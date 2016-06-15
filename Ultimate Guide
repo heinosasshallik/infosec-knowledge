@@ -288,6 +288,14 @@ For example, include("shell.php\0.img") and will try to include "shell.php".
 Doesn't work since PHP 5.3.4 (preg_ functions should still be vulnerable)
 If you try to do it after PHP 5.3.4, then it simply won't open anything with a null byte in it (even if you put the byte after the correct filename)
 
+[+] Double encoding:
+If there's an attack detection system in place, then if there's also a decode() before the include()
+, then you can bypass the detection system by double URL encoding the attack. This works because
+it will be decoded the second time by the decode() and will be valid code.
+This is a rare vulnerability though.
+It might occur when the dev is dumb or when there's some kind of third party app in between the include() and GET,
+which does the decode.
+
 [+] Remote file inclusion - how to pass any extension or suffix to the URL (like "google.com/.php") without errors:
 You can try to include Google's homepage by using the accessing URL: http://vulnerable/index.php?page=http://www.google.com/?
 The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by Google's servers as a parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
@@ -337,7 +345,7 @@ Example: http://127.0.0.1/fileinclude.php?lang=php://filter/convert.base64-encod
 data://text/plain;base64 (this probably isn't useful)
 
 [+] Directory traversal - try putting the folder name in there instead of the filename. I wonder what
-will happen.
+will happen. (not much. You can't include() a folder. Depends on the command)
 ---------------
 Post exploitation
 ----------------

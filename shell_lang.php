@@ -1,5 +1,5 @@
 <?php
-	$dir = getcwd();
-	$files1 = scandir($dir);
-	print_r($files1);
+	$myfile = fopen("index.php", "r") or die("Unable to open file!");
+	echo fread($myfile,filesize("index.php"));
+	fclose($myfile);
 ?>

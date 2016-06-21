@@ -207,9 +207,15 @@ Clickjacking
 --------------------
 Refer to the hacksplaining.com lesson about it. 
 
-----------
-SQLi
---------
+--------------------
+SQLi/SQL injection
+---------------------
+
+[+] As always, the first step to checking that the vulnerability exists is trying to get an injected query that gives the same reply as the legimitate one. For example:
+?id=11-1  should be the same as   ?id=10  (if it's not a string)
+also you can try ...UNION SELECT 1,2,3-- 
+
+
 Make sure the number of columns in the UNION  request matches the amount before the UNION. 
 You can do this with UNION SELECT 1, 2, 3, 4, etc. until you stop getting an error
 
@@ -218,7 +224,13 @@ same though (so if you do mysql_fetch_array(sqlquery)['id'] (and id is the first
 then it will give you 1. If you do SELECT 1, 2 and id is the second row, you get 2.
 
 When you want to comment something out, you need "-- " at the end. MIND THE SPACE.
-The problem with browsers is that even if you put that space at the end, it will take it off. Use %20 at the end instead.
+The problem with URL bars in browsers is that even if you put that space at the end, it will take it off. Use %20 at the end instead.
+
+Keep in mind the left to right nature of SQL (like most other languages).
+SELECT user, password WHERE user=admin AND password='' OR 1=1-- 
+is equivalent to
+SELECT user, password WHERE (user=admin AND password='') OR 1=1-- 
+Meaning you'll get all users returned. Or, if only one user is returned, you'll only get the first user back.
 
 To get table and column info, type 
 SELECT concat(table_name,':', column_name) FROM information_schema.columns
@@ -240,6 +252,12 @@ Prepared statements/Parameter binding (same thing) is the way to go. Makes it im
 (unless it's incorrectly setup). You have to make sure that attackers can't change the command
 from neither the query itself or when you get data from the database that they might have 
 changed (which is called second-order injection or something)
+
+[+] Obscure edge gase: GBK addslashes()/real_escape_string() bypass.
+http://shiflett.org/blog/2006/jan/addslashes-versus-mysql-real-escape-string
+
+[+] LDAP may be used instead of SQL when storing passwords (because it's really fast). In that case, use LDAP injection.
+
 ---------------
 File upload vulns
 ---------------

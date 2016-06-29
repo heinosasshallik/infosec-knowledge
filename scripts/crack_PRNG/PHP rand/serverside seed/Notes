@@ -1,0 +1,59 @@
+--------------------
+Cracking random()
+---------------------
+There are 31 numbers.
+t_int32 numbers = new int[31]
+Each additional number is calculated like:
+numbers[index] = numbers[index] + numbers[index-3]
+
+All the outputs are bitshifted to the right by one.
+You can use some tricks to get the original numbers.
+
+Most notably:
+numbers[0] = 0001  //when bitshifted, shows up as 0000 in the outputs
+numbers[3] = 0011  //when bitshifted, shows up as 0010
+numbers[0] = numbers[0] + numbers[3] = 0100  //shows up as 0100
+ 
+if either numbers[0] or numbers[3] didn't end with a 1, then the output would show 0010 instead.
+----------------------------
+Cracking rand() with range:
+-----------------------------
+
+Range algorithm:
+tmax = pow(2,32)-1
+max = highest number in range (included)
+min = lowest number in range (included)
+number2 = min + (long)( (double)(max-min+1.0)  *  number/(tmax+1.0)  )
+
+long rounds downward.
+(long)1.9999 == 1
+
+To get number from number2 (this algorithm may be flawed. if max = tmax, then number_min should
+equal number max, but it actually gives 1 as the answer):
+number_min = (number2-min) / (max-min+1.0) * (tmax+1.0)
+number_max = (number2+1.0 - min) / (max-min+1.0) * (tmax+1.0)
+
+WAIT A SEC.
+state[3] = state[3] + state[0]
+if we roughly know state[3] and we roughly know state[0], we should be able to roughly calculate the next state[3], right?
+DISCOVERY:
+if outputs are in range [1...100], then output[3] + output[0] == output[3] (if output[3] + output[0] <= 100)
+WTF? I thought the outputs were bitshifted and adding the outputs together isn't the same as adding the states together.
+It is though! In 3/4 cases it's exactly the same (as adding the states and bitshifting), and even in the 1/4 cases where it's 
+lower than adding the states, it has no significance, because when you round down to such a small range, a difference of 1
+has no significance.
+
+SOLUTION:
+roughly calculate the original outputs (maybe take the arithmetic average of min and max),
+bitshift them to the left, add them together, calculate the new value. 
+
+I keep having a situation where all the sums were lowered by one, so the normal output was rarer and
+normal output - 1 (num1 + num2 - 1) was more common. Why?
+
+It seems to me that it should kind of be possible to do the first trick with the ranged output as well.
+whether the actual output is num1+num2 or num1+num2-1, that tells us something.
+if we get a number that's lower than we expected, then we can calculate its minimum value
+(based on the minimums of the two numbers we used to calculate that number) and its maximum value
+(based on the output + 0.99999999999). That way, we should start getting some pretty accurate results.
+|
+We would implement this by having not the previous values, but the previous ranges.

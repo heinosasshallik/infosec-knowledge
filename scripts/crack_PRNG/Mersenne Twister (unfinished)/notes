@@ -1,0 +1,9 @@
+After the initial twist, mt[0] is always 0x80000000. (I think they wanted to XOR it, but it's assigned)
+Could this lead to some cryptographical insecurity? - Not really, the state[0] is always the same, but it changes based on state[1] immediately anyways.
+
+MTRandom is supposed to inherit from Random, thus nextInt() would
+go through Random and call next()
+
+We are in the middle of the twister, index is 300. When we obtain the next 624 states, how does the twist work? 
+Will there be no difference if we start from the middle? (state[0] is twisted from state[623], or is state[0] the same as state[623], etc?
+

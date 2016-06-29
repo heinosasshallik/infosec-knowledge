@@ -5,7 +5,10 @@
 #SETTINGS:
 
 #If you want to test only php filenames
-onlyPHP = True
+onlyPHP = False
+
+#HEAD requests are faster, GET requests are less suspicious.
+mode = "GET"
 
 import urllib2
 import httplib
@@ -20,12 +23,15 @@ def bruteforce(targetFile, position, mode):
 	separatedBySlashes = targetFile.split("/")
 	targetFilename = separatedBySlashes[-1]
 	if onlyPHP:
-		if "php" not in targetFilename and "PHP" not in targetFilename and "php5" not in targetFilename and "php4" not in targetFilename:
+		if "php" not in targetFilename and "PHP" not in targetFilename and "php5" not in targetFilename and "php4" not in targetFilename and "php3" not in targetFilename:
 			return
 			
 	#Separate the file path
-	targetFilePath = "/".join(separatedBySlashes[1:-1]) + "/" 
-	
+	if len(separatedBySlashes[1:-1]) == 0:
+		targetFilePath = "/"
+	else:
+		targetFilePath = "/" + "/".join(separatedBySlashes[1:-1]) + "/" 
+
 	#old.filename.php	
 	if position == "before":
 		testFilename = backupExtension + "." + targetFilename
@@ -52,17 +58,20 @@ def bruteforce(targetFile, position, mode):
 		#print targetRoot + targetFilePath + testFilename
 		print("Testing: " + targetRoot + targetFilePath + testFilename)
 		conn = httplib.HTTPConnection(targetRoot)
+		#print(targetRoot)
 		conn.request(mode, targetFilePath + testFilename)
+		#print(mode+ ", " + targetFilePath + testFilename)
 		response = conn.getresponse()
 		#Will not display if urllib throws 404 error
 		if "404" not in str(response.status):
+			if response.reason == "":
+				print("[ERROR]: DISCARDING, RESPONSE CODE EMPTY. This might mean the request is malformed.")
+				return
 			foundBackups.append(targetFilePath + testFilename + ": " + str(response.status) + " " + response.reason)
-			
+
 	except Exception:
 		exception = traceback.format_exc()
 		print exception
-		#if not "HTTP Error 404: Not Found" in exception:
-		#	print testFilename + " Didn't 404!"
 	
 		
 
@@ -83,8 +92,7 @@ foundBackups = []
 #Edge cases - "Copy of" before and "~" after
 backupExtensions = ["", "zip", "bak", "txt", "src", "dev", "old", "inc", "orig", "copy", "cpy", "tmp", "bkup", "backup", "tar", "gz"]
 
-#HEAD requests are faster, GET requests are less suspicious.
-mode = "GET"
+
 
 for targetFile in targetFiles:
 	#Edge cases first, since they don't require checking all extensions:
@@ -101,6 +109,6 @@ for targetFile in targetFiles:
 		#Instead of
 		bruteforce(targetFile, "replace", mode)
 	
+print("\n\nResults:")
 for backup in foundBackups:
-	print("\n\nResults:")
 	print(backup)

@@ -64,6 +64,8 @@ This is useful because hidden files may not be hardened against attacks, they ma
 old and therefore vulnerable or give away source code (browsing files like mypage.php.backup will display the code in HTML)
 Also log files may contain sensitive data.
 
+[+] Burp can be used for mapping the site.
+
 [+] Inspect known HTTP headers and check for vulns (like outdated software, 
 remote file inclusion, etc).
 
@@ -184,6 +186,7 @@ Basically says that "if you have the letter 'q', then the letter that follows it
 This is built into John the Ripper
 The result is that most of the things you get are words that look like they're taken from 
 a dictionary (like "dog"). But also, you get words like "stech", which seems like it could be a password.
+
 [+] Bruteforce HTTP Basic Auth (the popup screen)
 hydra -L users.lst -P passwords.txt -f www.site.org http-head /path/of/target/ -V
 -V is verbose mode,  -f is exit after first login pair found
@@ -237,6 +240,7 @@ SELECT concat(table_name,':', column_name) FROM information_schema.columns
 
 [+] SQLmap tutorial - http://www.binarytides.com/sqlmap-hacking-tutorial/
 frst thing to try - sqlmap -u "mysite.com/sql.php?param=1"
+POST request: https://hackertarget.com/sqlmap-post-request-injection/
 
 [+] Filter evasion:
 Advanced ways to evade filters (using tricks like putting backslashes, using MySQL syntax, etc):
@@ -257,7 +261,44 @@ changed (which is called second-order injection or something)
 http://shiflett.org/blog/2006/jan/addslashes-versus-mysql-real-escape-string
 
 [+] LDAP may be used instead of SQL when storing passwords (because it's really fast). In that case, use LDAP injection.
+<backstory>
+LDAP is used when a lot of different services have to be authenticated against a single back-end.
+If you just want to use it for authenticating logins, it's better to just use the database you already have (so maybe like MySQL)
+It's also useful if you want to incorporate authentication, privilege management and resource management in a database.
 
+
+Good tutorial on how LDAP queries work:
+https://technet.microsoft.com/en-us/library/aa996205(v=exchg.65).aspx
+</backstory>
+
+[+] Injection tutorial:
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Blackhat%20Europe%202008%20%20-%20LDAP%20Injection%20&%20Blind%20LDAP%20Injection.pdf
+
+When using ldap_bind(), if no parameters are supplied, then it's considered an anonymous bind. That's one way to get into someone's account.
+This works if the username and password aren't checked for emptyness and if they return NULL.
+(!)The way to get parameters to be null is not by doing ?username=&password=, but by not putting them in there at all, so just ?.
+
+If doing a search, then you can do an injection:
+Let's take (&(uname=blah)(passwd=(blah2)) as an example.
+
+Let's inject blah) into uname and blah2 into passwd
+OpenLDAP doesn't read anything after (&(uname=blah)) closes (although I haven't seen an example where this works yet). 
+That means the (passwd=blah2)) will go unnoticed. 
+Otherwise, you can inject a NULL byte where you want to end the query and that might work as well.
+OpenLDAP also just starts reading the query left to right and doesn't care if the part after the injection is syntactically incorrect.
+
+Active Directory will throw an error when you try to put two queries (however some clients ignore the second query and only send the first one, making the injection work).
+That means you'll have to make the injection into one query.
+
+Let's inject blah)(injected_filter into uname and blah2 into passwd. Now we have a query with 3 filters.
+(&(uname=blah)(injected_filter)(passwd=blah2))
+This is a good way to check for injection. If injected_filter is (&) and the query is successful, then it works.
+(!) (1=1) isn't the TRUE filter in LDAP. Use (&) instead! (1=1) gives you some weird shit that sometimes works, sometimes doesn't
+
+Also, if * is allowed, then you can inject username=* to get the first username in the database.
+Web for Pentester's examples are good if you want to look at the code (in the iso)
+
+(&(uid=*)(userPassword=*)(&))
 ---------------
 File upload vulns
 ---------------
@@ -565,7 +606,7 @@ Importantly, any string which has a letter or "0whatever" in the beginning is eq
 Also TRUE == "whatever" will also always return true.
 
 JSON:
-{"username":0}
+{"username":0}   //Might also work with "username":true
 if (0 == "testusername") { //works also with (123 == "123testusername")
 		echo "username bypassed";
 }

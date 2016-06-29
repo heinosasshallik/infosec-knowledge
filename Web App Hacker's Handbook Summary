@@ -1,0 +1,68 @@
+--------------------------------------
+The Web Application Hacker's Handbook
+--------------------------------------
+
+---------------------------
+---------------------------
+Core Defense Mechanisms
+---------------------------
+---------------------------
+
+------------------
+1) Input Validation
+------------------
+
+[+] Treat every source of input as malicious, even server-side input:
+At every step of processing, apply input sanitation to the input.
+If server-side data is completely trusted, a trained hacker could use it to his advantage. For example, he could get malicious SOAP (btw, look up what are SOAP services)
+code into a SQL database and then have the server use that code when requesting additional data in another transaction.
+Also, if the server sends an email when someone has had a failed login, then the server needs to make sure that any user data included in the email doesn't contain 
+SMTP injections.
+
+[+] Multistep validation:
+When you strip <script> from input, then <sc<script>ript> will still get through. This has to be done recursively.
+BUT, if the application first removes ../ recursively and then removes ..\ recursively, the following input can be used to defeat the validation:
+....\/
+
+[+] Canonicalization, in other words data transformation:
+Double URL encoding:
+If server does urldecode() after input validation, then you can get an apostrophe to bypass the filter by doing %2527. (%25 is %, %27 is an apostrophe)
+
+Also, not all canonicalization takes place on the server-side. If you encode an XSS-attack, then it may go unnoticed on the server-side. 
+Subsequently, some browsers automatically urldecode() certain data (like src=j&#x61;vasc&#x72ipt&#x3a;alert&#x28;1&#x29; of an iframe), 
+and you could get an XSS-attack underway.
+
+----------------------
+2) Handling attackers
+----------------------
+[+] You should take as much action as possible to frustrate the attacker.
+
+[+] Never give the attackers system-generated errors. Use try-catch blocks extensively (system-generated errors make life way easier for attackers)
+[+] Maintain Audit Logs, which log important events. (poorly secured audit logs are good for attackers)
+[+] Alert admins based on anomalous behaviour
+[+] React to attacks. If you automatically block the attacker's IP (or generate a captcha or make his requests slower) based on your understanding that he's a potential attacker, then that will frustrate him to no end.
+
+---------------------------
+3) Managing the Application
+---------------------------
+[+] Often applications have an admin-panel built into them. That's especially security-critical, since if you can compromise that, you can compromise the
+entire application.
+
+---------------------------
+---------------------------
+Web Application Technologies
+---------------------------
+---------------------------
+
+[+] HTTP
+
+[+] REST - You're requesting the "state" of the current server's resources.
+http://wahh-app.com/search?make=ford&model=pinto     -  This query string is, in a RESTful way:
+http://wahh-app.com/search/ford/pinto
+
+When mapping an application's attack surface, you need to take into consideration these two styles of supplying parameters.
+
+[+] HTTP proxy - 
+	*) If using HTTP, you'll specify the target server in the headers and give the request to the proxy server, who will forward it.
+	*) If using HTTPS, then you first send a CONNECT request and after the TCP connection is established, the connection
+		gets encrypted and the proxy just relays all the encrypted data

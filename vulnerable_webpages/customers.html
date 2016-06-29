@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Customers</title>
+	<meta charset="UTF-8">
+	<link href="site.css" rel="stylesheet">
+</head>
+
+<body>
+<nav id="nav1"></nav>
+	
+<div id="main">
+	<h1>Customers</h1>
+	<div id="id01"></div>
+	
+	<footer id="footer1"></footer>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+var xmlhttp = new XMLHttpRequest();
+var url = "customerdata.php";
+
+xmlhttp.onreadystatechange = function() {
+	if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+		generateTable(xmlhttp.responseText);
+	}
+}
+
+xmlhttp.open("GET", url, true);
+xmlhttp.send();
+
+function generateTable(response) {
+	var obj = JSON.parse(response);
+
+	var i;
+	//I wonder if there's a better way to generate a table from JSON.
+	var out = "<table><tr><th>Name</th><th>City</th><th>Country</th></tr>";
+	for (i = 0; i < obj.length; i++) {
+		out += "<tr><td>" +
+		obj[i].name +
+		"</td><td>" +
+		obj[i].city +
+		"</td><td>" +
+		obj[i].country +
+		"</td></tr>";
+	}
+	out += "</table>";
+	document.getElementById("id01").innerHTML = out;
+}
+</script>
+</body>
+</html>

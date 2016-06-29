@@ -208,9 +208,9 @@ Clickjacking
 --------------------
 Refer to the hacksplaining.com lesson about it. 
 
---------------------
+-------------------------------------------------
 SQLi/SQL injection
----------------------
+--------------------------------------------------
 
 [+] As always, the first step to checking that the vulnerability exists is trying to get an injected query that gives the same reply as the legimitate one. For example:
 ?id=11-1  should be the same as   ?id=10  (if it's not a string)
@@ -258,6 +258,14 @@ changed (which is called second-order injection or something)
 [+] Obscure edge gase: GBK addslashes()/real_escape_string() bypass.
 http://shiflett.org/blog/2006/jan/addslashes-versus-mysql-real-escape-string
 
+---------------------
+NoSQL injection
+---------------------
+The way NoSQL works is you send a request to update somethin
+----------------
+LDAP injection
+----------------
+
 [+] LDAP may be used instead of SQL when storing passwords (because it's really fast). In that case, use LDAP injection.
 <backstory>
 LDAP is used when a lot of different services have to be authenticated against a single back-end.
@@ -269,7 +277,7 @@ Good tutorial on how LDAP queries work:
 https://technet.microsoft.com/en-us/library/aa996205(v=exchg.65).aspx
 </backstory>
 
-[+] Injection tutorial:
+[+] LDAP Injection tutorial:
 http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Blackhat%20Europe%202008%20%20-%20LDAP%20Injection%20&%20Blind%20LDAP%20Injection.pdf
 
 When using ldap_bind(), if no parameters are supplied, then it's considered an anonymous bind. That's one way to get into someone's account.
@@ -297,6 +305,8 @@ Also, if * is allowed, then you can inject username=* to get the first username 
 Web for Pentester's examples are good if you want to look at the code (in the iso)
 
 (&(uid=*)(userPassword=*)(&))
+
+
 ---------------
 File upload vulns
 ---------------

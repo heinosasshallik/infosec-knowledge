@@ -66,3 +66,67 @@ When mapping an application's attack surface, you need to take into consideratio
 	*) If using HTTP, you'll specify the target server in the headers and give the request to the proxy server, who will forward it.
 	*) If using HTTPS, then you first send a CONNECT request and after the TCP connection is established, the connection
 		gets encrypted and the proxy just relays all the encrypted data
+		
+[+] Java EE (read about it in the book)
+
+[+] ASP.NET - competitor to Java.
+
+[+] SOAP
+Applications use this to communicate with each other. 
+XML in message body.
+
+[+] DOM/Document Object Model
+Abstract representation of a HTML document, which can be manipulated and queried.
+
+[+] AJAX
+Send data in the background with XMLHttpRequest.
+
+[+] JSON
+Another way of organizing data. Easier than XML.
+
+[+] Same-origin policy
+You can't make XMLHttpRequests to other domains. You can't read the cookies of other domains.
+You can make GET and POST requests to other domains via images and forms, but you can't process the response from that.
+You can load a script from another domain and execute it in yours.
+
+[+] States/Sessions.
+Store data about the user server-side. Each user gets a session cookie. For example, PHPSESSIONID
+
+[+] Encoding schemes:
+(Note: All this is just how it looks when being transmitted over HTTP)
+
+URL encoding: percent and then letter: %25 is %, %20 is space, %00 is NULL byte
+Unicode: has %u. %u2215 is /
+UTF-8: has each byte expressed in hexadecimal and preceded by %. %c2%a9 is ©, %e2%89%a0 is "= with a strike through it"
+HTML encoding: & and then description, ends with ;. For example, &quot; is ", &amp; is &.
+HTML encoding can also be done in decimal form: &#34; is ", &#39; is '
+Base64 can make use of lowercase and uppercase letters, as well as '+' and '/'. It comes in blocks of three. If the final block doesn't
+have enough data for three characters, it's padded with either one or two '=' signs, depending on if data for one or two characters are missing.
+Hexadecimal encoding uses 0-9 and a-f.
+
+
+-----------------------
+Mapping the Application
+-----------------------
+
+[+] Enumerating by hand using burp is better than using an automated spider.
+
+[+] Look for hidden content: 
+backups (both files and archives -- Create archive discoverer! Maybe DL burpsuite pro) and old versions of files.
+comments in HTML (both by devs and applications)and POST forms with disable submit buttons.
+new functionality that's on the server for testing, but not linked from the main site (for example, when it's said "coming soon", you could see if it's already on there)
+default functionality that has been left on the server (for example, default files for 3rd party apps that haven't been deleted or mby installation files)
+
+[+] Brute-forcing directories and filenames:
+
+1) Run basic brute-force test, looking for common directories and filenames in the folders you have discovered using manual mapping.
+
+2) Identify what kind of naming scheme is in use. 
+For example, if there are pages called AddDocument.jsp and ViewDocument.jsp, 
+there may also be pages called EditDocument.jsp and RemoveDocument.jsp.
+You'll get a feel for the dev's naming style. Does he do AddANewUser.asp, AddUser.asp, AddUsr.asp or AddU.jsp?
+
+If you can fine-tune your wordlist and make more precise searches, then do so.
+
+If you find a document called AnnualReport2015, then you can guess that there's also one called AnnualReport2016.
+

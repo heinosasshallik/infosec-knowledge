@@ -8,7 +8,12 @@
 onlyPHP = False
 
 #HEAD requests are faster, GET requests are less suspicious.
-mode = "GET"
+#mode = "GET"
+mode = "HEAD"
+
+#The extensions you want to test
+#Edge cases - "Copy of" before and "~" after
+backupExtensions = ["", "zip", "bak", "txt", "src", "dev", "old", "inc", "orig", "copy", "cpy", "tmp", "bkup", "backup", "tar", "gz"] #Should make custom handling for zip, tar and gz files, since index.zip.php doesn't really make any sense.
 
 import urllib2
 import httplib
@@ -89,8 +94,8 @@ targetFiles = [path.replace("http://", "") for path in targetFiles] #Remove the 
 
 foundBackups = []
 
-#Edge cases - "Copy of" before and "~" after
-backupExtensions = ["", "zip", "bak", "txt", "src", "dev", "old", "inc", "orig", "copy", "cpy", "tmp", "bkup", "backup", "tar", "gz"]
+
+
 
 
 

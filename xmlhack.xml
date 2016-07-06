@@ -20,7 +20,7 @@
         
         
         <item>
-            <title><b>test</b></title>
+            <title><![CDATA[<b>test</b>]]></title>
             <description><![CDATA[A man accused of murdering his dementia-suffering wife in a care home told staff she would not be there in two days' time, a jury hears.]]></description>
             <link>http://www.bbc.co.uk/news/uk-england-essex-36724402</link>
             <guid isPermaLink="true">http://www.bbc.co.uk/news/uk-england-essex-36724402</guid>

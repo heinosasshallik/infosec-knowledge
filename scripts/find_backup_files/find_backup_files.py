@@ -80,11 +80,9 @@ def bruteforce(targetFile, position, mode):
 	
 		
 
-#You should put the lowest level directory that you're trying to attack here.
-#targetRoot= "www.turundustugi.ee"#"127.0.0.1"
-#put specific directories and filenames here.
-#targetFiles = ["/web-serveur/ch17/index.php"]#/hello.php"]
-#Get the filepaths from filelist.txt instead
+
+
+#Get the filepaths from filelist.txt
 filelist = open("filelist.txt", "r")
 targetFiles = filelist.readlines()
 targetFiles = [path.strip() for path in targetFiles] #Take away the \n

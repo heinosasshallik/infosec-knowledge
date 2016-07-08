@@ -855,7 +855,8 @@ This allows you to read well-formed xml documents (you can probably also use thi
 Note: This is (as I understand it) done by doing the thing where you ask the parser to pull a DTD from a website.
 Look at 15:21 of video to see which platforms give you which options (also read the whitepaper in the [+] above this one.
 
-(*)If they're using PHP, you can get also get binary through the use of URL protocols. (php://base64 transition)
+(*)PHP IS THE MOST AWESOME THING EVER!
+For example, if they're using PHP, you can get also get any file format through the use of URL protocols. (php://filter/convert.base64-encode/resource= - the base64 transition)
 
 (*)Java - use file:// for directory listings.
 Use jar:// to  (20:00)

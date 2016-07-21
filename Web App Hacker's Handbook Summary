@@ -119,7 +119,7 @@ default functionality that has been left on the server (for example, default fil
 
 [+] Brute-forcing directories and filenames:
 
-1) Run basic brute-force test, looking for common directories and filenames in the folders you have discovered using manual mapping.
+1) Run basic brute-force test, looking for common directories and filenames in the folders you have discovered using manual mapping. Also look for backup files.
 
 2) Identify what kind of naming scheme is in use. 
 For example, if there are pages called AddDocument.jsp and ViewDocument.jsp, 
@@ -128,5 +128,15 @@ You'll get a feel for the dev's naming style. Does he do AddANewUser.asp, AddUse
 
 If you can fine-tune your wordlist and make more precise searches, then do so.
 
-If you find a document called AnnualReport2015, then you can guess that there's also one called AnnualReport2016.
+If you find a document called AnnualReport2015, then you can guess that there's also one called AnnualReport2016. If you found AddDocument, then bruteforce for EditDocument, UpdateDocument and DeleteDocuent
+
+[+] Google-Fu
+Use search engines to find stuff, like Google, Yahoo, archive.org.
+
+Google-Fu:
+site: archived pages of website
+link: links to (perhaps outdated) website functionality
+related: similar sites. May have interesting discussion about the site.
+Also perform the searches on Google Groups and Google News.
+
 

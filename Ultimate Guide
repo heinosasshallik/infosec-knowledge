@@ -1,5 +1,14 @@
 galerii has robots.txt
 
+//users/user[username='lel' and password='lol']
+//users/user[username='lel'][password='lol']
+
+//users/user[username='lel' and password='lol' or position()=2 or ''='']
+//users/user[username='' or position()=2]|a['' and password='lol']
+
+Awesome website with great tricks.
+http://securityidiots.com/Web-Pentest
+
 -------------------
 Attacking strategies:
 -------------------
@@ -63,7 +72,12 @@ https://labs.detectify.com/2012/10/29/do-you-dare-to-show-your-php-easter-egg/
 ---------------
 Enumeration:
 ---------------
-Find potentially vulnerable folders or files that disclose information:
+[+] Search DNS records using dig.
+http://securityidiots.com/Web-Pentest/Information-Gathering/Part-4-DNS-information-Gathering-with-DIG.html //not that useful
+
+If the website is using shared hosting, you can attack the same server from other websites as well (you pwn one website, you can get to all the others as well). http://www.yougetsignal.com/tools/web-sites-on-web-server/
+
+[+]Find potentially vulnerable folders or files that disclose information:
 This is useful because hidden files may not be hardened against attacks, they may be backups that are either
 old and therefore vulnerable or give away source code (browsing files like mypage.php.backup will display the code in HTML)
 Also log files may contain sensitive data.
@@ -409,6 +423,8 @@ For this, put an encoded newline (%0a) and your command after the initial comman
 -------------------------------------------------------
 Local File Inclusion/LFI/Directory Traversal
 -------------------------------------------------------
+http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
+
 [+] LFI often happens  in multi-language websites. It gets the $language from either the cookie or
 the GET request and then includes language/$lang.php.
 
@@ -420,6 +436,17 @@ For example, include("shell.php\0.img") and will try to include "shell.php". In 
 Doesn't work since PHP 5.3.4 (preg_ functions should still be vulnerable)
 If you try to do it after PHP 5.3.4, then it simply won't open anything with a null byte in it (even if you put the byte after the correct filename)
 From my server: Failed opening 'http://www.maribell.ee' for inclusion, when the url is ?lang=http://www.maribell.ee%00.whatever
+
+[+] If null-byte doesn't work, use truncation.
+http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
+http://security.stackexchange.com/questions/17407/how-can-i-use-this-path-bypass-exploit-local-file-inclusion
+
+Basically, /etc/passwd is the same as /etc/passwd/ to PHP (IN SOME CASES, doesn't work on my PHP+Apache setup), because it strips trailing slashes. Also, PHP will truncate filenames longer than 4096 bytes. Meaning, you can do
+/etc/passwd/./././././././././  (a lot of these) ././.php
+and the .php at the end will get tossed away!
+
+[+] Or you can inject code directly into the URL by doing data://. That way, it'll include the code directly from the URL.
+http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
 
 [+] Double encoding:
 If there's an attack detection system in place, then if there's also a decode() before the include()
@@ -442,13 +469,13 @@ High - Dev allows only certain files to be included, like file1, file2, file3. H
 Meaning, file1/../file1.php returns file1.php.
 
 [+] Methods of getting PHP on the server for LFI:
-    inject the PHP code in the log: for example with a web server, by accessing a crafted URL (the path contains the PHP code), and including the web server log.
+    inject the PHP code in the log: for example with a web server, by accessing a crafted URL (the path contains the PHP code), and including the web server log. http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
     inject the PHP code in an email, by sending an email and including the email (in `/var/spool/mail).
     upload a file and including it, you can for example upload an image and put your PHP code in the image's comment section (so it won't get modify if the image is resized).
     upload the PHP code via another service: FTP, NFS, ...
     
     Also these: http://gynvael.coldwind.pl/download.php?f=PHP_LFI_rfc1867_temporary_files.pdf
-    /proc/self/environ
+    /proc/self/environ (you'll probably get permission denied)  https://www.exploit-db.com/papers/12886/
 	/proc/self/fd/...
 	/var/log/...
 	/var/lib/php/session/(PHP Sessions)
@@ -775,13 +802,21 @@ Your code will get parsed in another app and you'll get the $$$.
 
 [+] XPath injection.
 http://www.w3schools.com/xsl/xpath_syntax.asp  //Xpath syntax tutorial
-https://www.owasp.org/index.php/XPATH_Injection //really simplistic
+http://securityidiots.com/Web-Pentest/XPATH-Injection/Basics-XPATH-injection.html //Really useful! Also has blind in next tutorials.
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Introduction%20to%20Xpath%20injection%20techniques.pdf //intoduction to xpath injection
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20Blind%20Xpath%20injection.pdf //Blind XPath injection.
 
 If you want to find something  in xml document, you use xpaths. For example, querying "/a/b/c" will output "The value" in this: <a><b><c>The value</c></b></a>
 Thus, we get xpath injections.
 
-If you want to find out other values of the xml document (like passwords) using xpath injection, you can probably do blind xpath injection.
+You can use [position()=1] to get the first element.
 
+The equivalent of UNION in XPath is a pipe  '|'. When you do the pipe, only the results from the first statement count apparently (when doing the xpath_search, I think), so it's basically like commenting the rest out, I suppose.
+Example:
+/userdb/user[id='/*injection_starts_here*/' or position()=1]/New_Element_name|a['/*injection_ends_here*/']/username
+You can see that two tricks are used here. First there's getting the first element using position()=1. Secondly, we've used a pipe to essentially comment out the rest of the query, so that we can get the value of New_Element_name instead of username returned to us.
+
+Getting all the elements - http://securityidiots.com/Web-Pentest/XPATH-Injection/Basics-XPATH-injection.html
 
 [+] 2014 Whitepapaer that's a great resource when pentesting XXE. From the same guys that did the OWASP talk below.
 http://www.vsecurity.com/download/publications/XMLDTDEntityAttacks.pdf
@@ -875,8 +910,12 @@ If the java is old (pre september 2012. 1.7u7, 1.6u32 and earlier), then gopher:
 	4) Find our file using directory listings
 	5) Use gopher to authenticate against the admin interface (instead of using gopher you could CSRF an internal user (probably by using XML entities for the CSRF) and still get the same result)
 	6) Use the admin interface to deploy the temp file as a new app
-	7) Ca$h m0n3y!
+	7) ???
+	8) Ca$h m0n3y!
 
 
-
-
+------------------------------------------------
+WAF bypassing/Web application firewall bypassing
+------------------------------------------------
+http://securityidiots.com/Web-Pentest/WAF-Bypass/waf-bypass-guide-part-1.html
+http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20POC2009%20Shocking%20News%20In%20PHP%20Exploitation.pdf

@@ -369,7 +369,21 @@ this covers spoofing content-type, bypassing imagesize() and filetype checks.
 [+] If you aren't allowed to upload .php, try uploading .php3 or .php.test (since Apache doesn't have handler for that, it will be used as .php)
 If the dev checks filetype by doing split(), then shell.jpg.php will work
 [+] To change MIME type (NOT the same as getimagesize()), use burpsuite.
-To bypass getimagesize(), send a valid image with php in its comments
+[+] To bypass getimagesize(), send a valid image with php in its comments
+
+This can be done using jhead.
+https://phocean.net/2013/09/29/file-upload-vulnerabilities-appending-php-code-to-an-image.html
+
+First, clear the headers using 
+jhead -purejpg <filename>.jpg
+
+Add exif jpeg comment
+jhead -ce <filename>.jpg
+
+Write your php here. Note: the editor is vim I guess. (<can't remember, maybe 'i' for insert, ESC for exiting insert, :wq for save file and quit)
+For example (note the __halt_compiler() at the end. Otherwise the image bytes will get executed)
+<?php echo "hi"; __halt_compiler();?>
+
 [+] .htaccess is awesome (nginx doesn't support .htaccess files, only Apache). Can turn .jpg into .php or even the htaccess itself into .php.
 
 [+] The solution is to prevent the users from accessing those files directly by putting them
@@ -445,8 +459,11 @@ Basically, /etc/passwd is the same as /etc/passwd/ to PHP (IN SOME CASES, doesn'
 /etc/passwd/./././././././././  (a lot of these) ././.php
 and the .php at the end will get tossed away!
 
-[+] Or you can inject code directly into the URL by doing data://. That way, it'll include the code directly from the URL.
-http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
+[+] Or you can inject code directly into the URL by doing data://. That way, it'll include the code directly from the URL (needs to be urlencoded and requires allow_url_include
+
+https://www.idontplaydarts.com/2011/03/php-remote-file-inclusion-command-shell-using-data-stream/  //Use this one
+http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html //I think data: can also be used instead of data://
+
 
 [+] Double encoding:
 If there's an attack detection system in place, then if there's also a decode() before the include()
@@ -468,6 +485,8 @@ Medium - ../ is filtered, but only once. Meaning, ....//, after filtering, becom
 High - Dev allows only certain files to be included, like file1, file2, file3. He did it by comparing the filename with "file*".
 Meaning, file1/../file1.php returns file1.php.
 
+[+] Good overview of all the options available for exploiting LFI: https://websec.wordpress.com/2010/02/22/exploiting-php-file-inclusion-overview/
+
 [+] Methods of getting PHP on the server for LFI:
     inject the PHP code in the log: for example with a web server, by accessing a crafted URL (the path contains the PHP code), and including the web server log. http://securityidiots.com/Web-Pentest/LFI/guide-to-lfi.html
     inject the PHP code in an email, by sending an email and including the email (in `/var/spool/mail).
@@ -482,7 +501,7 @@ Meaning, file1/../file1.php returns file1.php.
 	/tmp/ (PHP Sessions)
 	php://input wrapper
 	php://filter wrapper
-	data: wrapper
+	data:// wrapper
    
    Also you can do it with anything that outputs phpinfo() (because the GET and POST variables are in it):
    http://repository.root-me.org/Exploitation%20-%20Web/EN%20-%20LFI%20with%20phpinfo()%20assistance.pdf
@@ -494,7 +513,7 @@ Meaning, file1/../file1.php returns file1.php.
 https://secure.php.net/manual/en/wrappers.php.php
 php://filter/convert.base64-encode/resource=index
 Example: http://127.0.0.1/fileinclude.php?lang=php://filter/convert.base64-encode/resource=hello.php
-data://text/plain;base64 (this probably isn't useful)
+Also you can do it with data:// (guide somewhere below)
 
 --------------------------
 RFI/Remote File Inclusion
@@ -692,7 +711,7 @@ Loose comparisons has some weird conversion rules.
 JSON is really useful because you can also send ints and bools and stuff, not just strings.
 
 Importantly, any string which has a letter or "0whatever" in the beginning is equal to int(0). If it begins with "123whatever", it's equal to int(123)
-Also TRUE == "whatever" will also always return true.
+!!Also TRUE == "whatever" will also always return true.
 
 JSON:
 {"username":0}   //Might also work with "username":true
@@ -705,13 +724,17 @@ if (0 == "testusername") { //works also with (123 == "123testusername")
 Use this to determine what counts as TRUE and what counts as false.
 http://php.net/manual/en/language.types.boolean.php
 
+There are better options than the empty parentheses bexause passing the empty parentheses generates an error. If that error is caught, the exploit doens't work. Find a better way to get strcmp to be 0 (check root-me's type juggling solutions and also the php.net website.
+
 JSON:
 {"password":[]}
 
 if (!strcmp([], "testpassword")) {
 	echo "password bypassed";
 }
-	
+
+
+[+] BTW, the same technique also works when using PHP serialized data instead of JSON!
 	
 -------------------------------
 Server-Side Template inclusion

@@ -38,7 +38,7 @@ state[3] = state[3] + state[0]
 if we roughly know state[3] and we roughly know state[0], we should be able to roughly calculate the next state[3], right?
 DISCOVERY:
 if outputs are in range [1...100], then output[3] + output[0] == output[3] (if output[3] + output[0] <= 100)
-WTF? I thought the outputs were bitshifted and adding the outputs together isn't the same as adding the states together.
+What??? I thought the outputs were bitshifted and adding the outputs together isn't the same as adding the states together.
 It is though! In 3/4 cases it's exactly the same (as adding the states and bitshifting), and even in the 1/4 cases where it's 
 lower than adding the states, it has no significance, because when you round down to such a small range, a difference of 1
 has no significance.

@@ -2,12 +2,21 @@ if [ $# -ne 1 ];
 then 
 	echo "Error: Illegal number of arguments"
 	echo "Input the directory you wish to audit as an argument"
-	echo "The package.json and package-lock.json will be audited in that directory."
-	echo "The script will then attempt to find occurrences of these packages in your code."
 	exit 1
 fi
 
 cd $1
+
+
+echo "npm audit results:"
+npm audit
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+
 
 number_of_vulnerable_packages=0
 prefix="Package"

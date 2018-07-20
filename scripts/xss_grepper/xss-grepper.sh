@@ -93,3 +93,9 @@ echo ""
 echo ""
 echo ""
 grep outerHTML -r --exclude-dir 'node_modules'
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+grep appendChild -r --exclude-dir 'node_modules'

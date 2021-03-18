@@ -208,3 +208,51 @@ with open('/home/user/input.txt', 'w') as f:
 
 python create_sploit.py > input.txt
 (cat ~/input.txt; cat) | /opt/phoenix/amd64/stack-five
+
+
+
+
+
+#############
+Stack 6
+#############
+https://www.lucas-bader.com/ctf/2019/02/02/stack6
+
+We can overwrite the bugger by the length of the initial string (which is "welcome home,", which is 15 bytes)
+
+If we assign ExploitEducation to be AAA.... (127 A's), then we start writing at *dest, which is eax, which is 0xffffd3da.
+We stop writing at 0xffffd3da + 0d127 = 0xFFFFD458 (including the byte starting from 58 and ending at 59). Interestingly enough, the last character written isn't a NULL byte. I guess C doesn't automatically put NULL bytes at the end, which kind of makes sense for replacing substrings of a string, for example.
+
+0xffffd45c is the return EIP value. Can't reach that.
+0xffffd458 is the saved previous base pointer. We can change 1 byte of that - the least significant/last byte.
+
+Also, the value from the top of ESP will be used to load the EIP. So we can actually control the place where the EIP will be loaded - we can set it to be the from within the buffer's contents I think.
+
+So since ebx was pushed at the start of the function, then ebx is changed to 0x41414141 atm.
+Then there is the leave instruction, which translates to: 
+  mov esp, ebp + 0x4
+  pop ebp
+
+So, as a result of the leave instruction, we get this:
+esp = 0xffffd45c (previous ebp + 0x4)
+ebp = 0xffffd441 (the last 0x41 was put there by us)
+
+Then there is the ret instruction, which translates to:
+  pop ecx ; the ecx is popped off of esp
+  jmp ecx
+
+The value popped is the saved EIP. Which is 0x0804865f, which brings us back to main.
+
+The segfault happens in this part:
+|           0x08048673 b    8b4dfc         mov ecx, dword [ebp - local_4h_2]
+|           0x08048676      c9             leave
+|           0x08048677      8d61fc         lea esp, dword [ecx - 4]
+\           0x0804867a      c3             ret
+
+After the leave, esp becomes esp = 0xffffd445, which is the previous ebp + 4
+But actually, all that leave does is change the new ebp, because in the next line, esp gets changed based on ecx (which in turn in decided by the previous ebp)
+
+So if we can control [ebp-0x4] then we can control ecx. If we can control [ecx-04] then we can control esp.
+If we can control ESP, then [ESP] will be used to load EIP.
+
+I copied the payload from the blog and it worked.

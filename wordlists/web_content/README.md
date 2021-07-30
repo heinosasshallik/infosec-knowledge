@@ -26,14 +26,14 @@ I've combined multiple wordlists into one, so I don't have to run so many scans 
 Unique lines sorted out with (leave 1 occurrence, preserve ordering, keep the first occurrence):
 
 ```
-tac file.txt | awk '! seen[$0]++'
+cat file.txt | awk '! seen[$0]++'
 ```
 
 Full commands for generating:
 
 ```
-tac common.txt raft-small-words* raft-medium-words* big.txt raft-large-words* | awk '! seen[$0]++' > ~/resources/infosec-knowledge/wordlists/web_content/combined_words.txt
+cat common.txt raft-small-words* raft-medium-words* big.txt raft-large-words* | awk '! seen[$0]++' > ~/resources/infosec-knowledge/wordlists/web_content/combined_words.txt
 
-tac raft-small-directories* directory-list-2.3-small.txt raft-medium-directories* directory-list-2.3-medium.txt apache.txt ~/resources/infosec-knowledge/wordlists/web_content/combined_words.txt directory-list-2.3-big.txt raft-large-directories* directory-list-1.0.txt | awk '! seen[$0]++' > ~/resources/infosec-knowledge/wordlists/web_content/combined_directories.txt
+cat raft-small-directories* directory-list-2.3-small.txt raft-medium-directories* directory-list-2.3-medium.txt apache.txt ~/resources/infosec-knowledge/wordlists/web_content/combined_words.txt directory-list-2.3-big.txt raft-large-directories* directory-list-1.0.txt | awk '! seen[$0]++' > ~/resources/infosec-knowledge/wordlists/web_content/combined_directories.txt
 ```
 

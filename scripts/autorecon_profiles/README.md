@@ -1,6 +1,6 @@
 These are the profiles I use with AutoRecon. The profiles are located in the `~/.config/AutoRecon/` directory.
 
-*Note: **Do not forget that you usually run AutoRecon as root, so don't forget to change the profiles in `/root/.config/AutoRecon/`, too.*
+Note: **Do not forget that you usually run AutoRecon as root**, so don't forget to change the profiles in `/root/.config/AutoRecon/`, too.
 
 ## Changes
 

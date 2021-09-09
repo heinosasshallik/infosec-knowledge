@@ -8,7 +8,7 @@ I've combined multiple wordlists into one, so I don't have to run so many scans 
       * raft-medium-directories.txt
       * directory-list-2.3-medium.txt
       * apache.txt 
-      * common-words.txt (aka all the combined words below. Otherwise there would be no .git...)
+      * common-words.txt (aka all the wordlists under "Files". Otherwise there would be no .git...)
       * directory-list-2.3-big.txt
       * raft-large-directories-lowercase.txt
       * raft-large-directories.txt 

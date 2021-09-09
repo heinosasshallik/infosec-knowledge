@@ -1,0 +1,2 @@
+static_tools filter=lfs diff=lfs merge=lfs -text
+static_tools/sucrack filter=lfs diff=lfs merge=lfs -text

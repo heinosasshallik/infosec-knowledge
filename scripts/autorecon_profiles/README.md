@@ -4,5 +4,8 @@ Note: **Do not forget that you usually run AutoRecon as root**, so don't forget 
 
 ## Changes
 
-I've replaced ffuf web fuzzing with gobuster fuzzing, added some more gobuster scans and replaced the wordlists with my own combined wordlists from here:
+* Replaced ffuf web fuzzing with gobuster fuzzing
+* Added some more gobuster scans and replaced the wordlists with my own combined wordlists 
+  * Wordlists available here:
 https://github.com/heinosasshallik/infosec-knowledge/tree/master/wordlists/web_content
+* Added a manual scan for subdomain enumeration of a website

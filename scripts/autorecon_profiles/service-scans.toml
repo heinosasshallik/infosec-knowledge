@@ -137,10 +137,11 @@ ignore-service-names = [
     name = 'gobuster_directories_combined'
     command = 'gobuster dir -u {scheme}://{address}:{port}/ -w /usr/share/seclists/Discovery/Web-Content/combined_directories.txt --no-tls-validation --status-codes "200,204,301,302,307,403,500" --no-progress 2>&1 | tee {scandir}/{protocol}_{port}_{scheme}_gobuster_directories_combined.txt'
 
+  
     [[http.manual]]
-    description = '(nikto) old but generally reliable web server enumeration tool'
+    description = '(ffuf) Enumerate subdomains of a web server (you will probably have to filter out incorrect entries and change the HOST header)'
     commands = [
-        'nikto -ask=no -h {scheme}://{address}:{port} 2>&1 | tee "{scandir}/{protocol}_{port}_{scheme}_nikto.txt"'
+        'ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -H "HOST:FUZZ.{address}" -u {scheme}://{address}:{port} -s 2>&1 | tee {scandir}/{protocol}_{port}_{scheme}_ffuf_enumerate_subdomain.txt',
     ]
 
     [[http.manual]]
@@ -153,6 +154,12 @@ ignore-service-names = [
     description = '(wpscan) WordPress Security Scanner (useful if WordPress is found):'
     commands = [
         'wpscan --url {scheme}://{address}:{port}/ --no-update -e vp,vt,tt,cb,dbe,u,m --plugins-detection aggressive --plugins-version-detection aggressive -f cli-no-color 2>&1 | tee "{scandir}/{protocol}_{port}_{scheme}_wpscan.txt"'
+    ]
+
+    [[http.manual]]
+    description = '(nikto) old but generally reliable web server enumeration tool'
+    commands = [
+        'nikto -ask=no -h {scheme}://{address}:{port} 2>&1 | tee "{scandir}/{protocol}_{port}_{scheme}_nikto.txt"'
     ]
 
     [[http.manual]]

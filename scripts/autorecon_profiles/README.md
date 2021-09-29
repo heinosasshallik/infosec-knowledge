@@ -21,7 +21,15 @@ https://github.com/heinosasshallik/infosec-knowledge/tree/master/wordlists/web_c
 
 ## Installation
 
-You need to have my custom plugins in autorecon's plugins directory.
+You need to have my custom plugins in autorecon's plugins directory. So either copy them over or create a symlink (useful for development)
+
+Copy:
+
+```
+cp /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py
+```
+
+Symlink:
 
 ```
 ln -s /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py

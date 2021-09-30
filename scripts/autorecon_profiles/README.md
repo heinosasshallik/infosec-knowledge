@@ -2,8 +2,6 @@ These are the custom configurations and plugins I use with AutoRecon. They belon
 
 ## TODO
 
-There's some issue with the service scans never starting. Not sure why...
-
 Port over gobuster-common, gobuster-db-backups and the subdomain enumeration script to AutoRecon v2 plugin
 Add dnsrecon plugin
 

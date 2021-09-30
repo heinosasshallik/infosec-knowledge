@@ -2,7 +2,10 @@ These are the custom configurations and plugins I use with AutoRecon. They belon
 
 ## TODO
 
+There's some issue with the service scans never starting. Not sure why...
+
 Port over gobuster-common, gobuster-db-backups and the subdomain enumeration script to AutoRecon v2 plugin
+Add dnsrecon plugin
 
 ## Changes
 
@@ -26,13 +29,13 @@ You need to have my custom plugins in autorecon's plugins directory. So either c
 Copy:
 
 ```
-cp /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py
+sudo cp /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py
 ```
 
 Symlink:
 
 ```
-ln -s /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py
+sudo ln -s /home/x90slide/resources/infosec-knowledge/scripts/autorecon_profiles/http_server_custom.py  /root/.config/AutoRecon/plugins/http_server_custom.py
 ```
 
 If that directory doesn't exist yet, then just run AutoRecon once as root, and they will be generated.

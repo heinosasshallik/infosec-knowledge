@@ -4,7 +4,6 @@ from shutil import which
 import os
 
 class DirBusterCustom(ServiceScan):
-
         def __init__(self):
                 super().__init__()
                 self.name = "Custom Directory Buster"

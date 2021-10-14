@@ -53,10 +53,6 @@ class DirBusterCustom(ServiceScan):
                                 service.add_manual_command('Enumerate files with extensions manually (change the extensions you want to enumerate).', ['dirb {http_scheme}://{addressv6}:{port}/ ' + wordlist + ' -l -r -S -X ",' + dot_extensions + '" -o "{scandir}/{protocol}_{port}_{http_scheme}_dirb_' + name + '.txt"'])
 
 
-
-
-
-
 class GobusterCommon(ServiceScan):
         def __init__(self):
                 super().__init__()
@@ -83,3 +79,22 @@ class GobusterCommon(ServiceScan):
                 name = os.path.splitext(os.path.basename(wordlist))[0]
                 await service.execute('gobuster dir -u {http_scheme}://{addressv6}:{port}/ -t ' + str(self.default_threads) + ' -w ' + wordlist + ' -e -k -x "' + self.default_ext + '" -z -o "{scandir}/{protocol}_{port}_{http_scheme}_gobuster_' + name + '.txt"')
 
+
+class CustomWebSubdomainEnumeration(ServiceScan):
+        def __init__(self):
+                super().__init__()
+                self.name = "Custom Web Subdomain Enumerator"
+                self.slug = 'custom-web-subdomain-enumerator'
+                self.priority = 0
+                self.tags = ['default', 'safe', 'long', 'http']
+
+        def configure(self):
+                self.match_service_name('^http')
+                self.match_service_name('^nacn_http$', negative_match=True)
+
+        def check(self):
+                if which('ffuf') is None:
+                        error('The ffuf program could not be found. Make sure it is installed. (On Kali, run: sudo apt install ffuf)')
+
+        def manual(self, service, plugin_was_run):
+                service.add_manual_command('(ffuf) Enumerate subdomains of a web server (you will probably have to filter out incorrect entries and change the HOST header)', ['ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -H "HOST:FUZZ.{address}" -u {http_scheme}://{address}:{port} -s 2>&1 | tee {scandir}/{protocol}_{port}_{http_scheme}_ffuf_enumerate_subdomain.txt'])          

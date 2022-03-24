@@ -1,0 +1,89 @@
+Reading symbols from level03...
+Dump of assembler code for function post_blog_article:
+   0x08049f20 <+0>:	push   ebp
+   0x08049f21 <+1>:	push   edi
+   0x08049f22 <+2>:	push   esi
+   0x08049f23 <+3>:	push   ebx
+   0x08049f24 <+4>:	sub    esp,0x4c
+   0x08049f27 <+7>:	mov    ebx,DWORD PTR ds:0x804bdfc
+   0x08049f2d <+13>:	test   ebx,ebx
+   0x08049f2f <+15>:	je     0x804a179 <post_blog_article+601>
+   0x08049f35 <+21>:	mov    edx,DWORD PTR ds:0x804bdf4
+   0x08049f3b <+27>:	test   edx,edx
+   0x08049f3d <+29>:	je     0x804a179 <post_blog_article+601>
+   0x08049f43 <+35>:	mov    eax,ds:0x804be04
+   0x08049f48 <+40>:	test   eax,eax
+   0x08049f4a <+42>:	je     0x804a179 <post_blog_article+601>
+   0x08049f50 <+48>:	mov    DWORD PTR [esp+0x4],0x1
+   0x08049f58 <+56>:	mov    DWORD PTR [esp],0x20000
+   0x08049f5f <+63>:	call   0x8048d20 <calloc@plt>
+   0x08049f64 <+68>:	mov    esi,DWORD PTR ds:0x804be00
+   0x08049f6a <+74>:	add    esi,DWORD PTR ds:0x804bdec
+   0x08049f70 <+80>:	add    esi,0x4
+   0x08049f73 <+83>:	mov    DWORD PTR [eax],0x54534f50
+   0x08049f79 <+89>:	mov    edi,eax
+   0x08049f7b <+91>:	mov    DWORD PTR [eax+0x4],0x6c622f20
+   0x08049f82 <+98>:	mov    DWORD PTR [eax+0x8],0x702f676f
+   0x08049f89 <+105>:	mov    DWORD PTR [eax+0xc],0x2074736f
+   0x08049f90 <+112>:	mov    DWORD PTR [eax+0x10],0x50545448
+   0x08049f97 <+119>:	mov    DWORD PTR [eax+0x14],0x312e312f
+   0x08049f9e <+126>:	mov    WORD PTR [eax+0x18],0xa0d
+   0x08049fa4 <+132>:	mov    DWORD PTR [eax+0x1a],0x6e6e6f43
+   0x08049fab <+139>:	mov    DWORD PTR [eax+0x1e],0x69746365
+   0x08049fb2 <+146>:	mov    DWORD PTR [eax+0x22],0x203a6e6f
+   0x08049fb9 <+153>:	mov    DWORD PTR [eax+0x26],0x736f6c63
+   0x08049fc0 <+160>:	mov    DWORD PTR [eax+0x2a],0xa0d65
+   0x08049fc7 <+167>:	lea    eax,[eax+0x2d]
+   0x08049fca <+170>:	mov    DWORD PTR [esp+0x10],ebx
+   0x08049fce <+174>:	mov    DWORD PTR [esp+0xc],0x804a3d4
+   0x08049fd6 <+182>:	mov    DWORD PTR [esp+0x8],0xffffffff
+   0x08049fde <+190>:	mov    DWORD PTR [esp+0x4],0x1
+   0x08049fe6 <+198>:	mov    DWORD PTR [esp],eax
+   0x08049fe9 <+201>:	call   0x8048f40 <__sprintf_chk@plt>
+   0x08049fee <+206>:	mov    DWORD PTR [esp+0x10],esi
+   0x08049ff2 <+210>:	mov    DWORD PTR [esp+0xc],0x804a3df
+   0x08049ffa <+218>:	mov    DWORD PTR [esp+0x8],0xffffffff
+   0x0804a002 <+226>:	mov    DWORD PTR [esp+0x4],0x1
+   0x0804a00a <+234>:	lea    ebx,[eax+0x2d]
+   0x0804a00d <+237>:	lea    eax,[edi+ebx*1]
+   0x0804a010 <+240>:	mov    DWORD PTR [esp],eax
+   0x0804a013 <+243>:	call   0x8048f40 <__sprintf_chk@plt>
+   0x0804a018 <+248>:	add    ebx,eax
+   0x0804a01a <+250>:	lea    eax,[edi+ebx*1]
+   0x0804a01d <+253>:	mov    WORD PTR [eax],0xa0d
+   0x0804a022 <+258>:	lea    esi,[ebx+0x2]
+   0x0804a025 <+261>:	mov    BYTE PTR [eax+0x2],0x0
+   0x0804a029 <+265>:	mov    ebx,DWORD PTR ds:0x804be00
+   0x0804a02f <+271>:	lea    eax,[edi+esi*1]
+   0x0804a032 <+274>:	mov    edx,DWORD PTR ds:0x804be04
+   0x0804a038 <+280>:	mov    DWORD PTR [esp],eax
+   0x0804a03b <+283>:	mov    DWORD PTR [esp+0x8],ebx
+   0x0804a03f <+287>:	add    ebx,esi
+   0x0804a041 <+289>:	mov    DWORD PTR [esp+0x4],edx
+   0x0804a045 <+293>:	call   0x8048e60 <memcpy@plt>
+   0x0804a04a <+298>:	lea    eax,[edi+ebx*1]
+   0x0804a04d <+301>:	add    ebx,0x2
+   0x0804a050 <+304>:	mov    WORD PTR [eax],0xa0d
+   0x0804a055 <+309>:	mov    BYTE PTR [eax+0x2],0x0
+   0x0804a059 <+313>:	mov    edx,DWORD PTR ds:0x804bdf4
+   0x0804a05f <+319>:	lea    eax,[edi+ebx*1]
+   0x0804a062 <+322>:	mov    esi,DWORD PTR ds:0x804bdec
+   0x0804a068 <+328>:	mov    DWORD PTR [esp],eax
+   0x0804a06b <+331>:	mov    DWORD PTR [esp+0x4],edx
+   0x0804a06f <+335>:	mov    DWORD PTR [esp+0x8],esi
+   0x0804a073 <+339>:	call   0x8048e60 <memcpy@plt>
+   0x0804a078 <+344>:	mov    edx,DWORD PTR ds:0x804bdfc
+   0x0804a07e <+350>:	mov    DWORD PTR [esp+0x4],0x3a
+   0x0804a086 <+358>:	mov    DWORD PTR [esp],edx
+   0x0804a089 <+361>:	mov    DWORD PTR [esp+0x2c],edx
+   0x0804a08d <+365>:	call   0x8048d10 <strchr@plt>
+   0x0804a092 <+370>:	mov    edx,DWORD PTR [esp+0x2c]
+   0x0804a096 <+374>:	test   eax,eax
+   0x0804a098 <+376>:	mov    ebp,eax
+   0x0804a09a <+378>:	je     0x804a181 <post_blog_article+609>
+   0x0804a0a0 <+384>:	mov    BYTE PTR [eax],0x0
+   0x0804a0a3 <+387>:	mov    eax,ds:0x804bdfc
+   0x0804a0a8 <+392>:	add    ebp,0x1
+   0x0804a0ab <+395>:	mov    DWORD PTR [esp+0x30],0x0
+Quit
+Undefined command: "exit".  Try "help".

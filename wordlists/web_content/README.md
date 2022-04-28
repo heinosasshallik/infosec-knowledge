@@ -1,3 +1,9 @@
+## Important note
+
+These changes have been merged into [SecLists](https://github.com/danielmiessler/SecLists) and are available at `Discovery/Web-Content/combined_directories.txt` and `Discovery/Web-Content/combined_words.txt`.
+
+## Readme
+
 I've combined multiple wordlists into one, so I don't have to run so many scans to find everything. The wordlists are from SecLists (roughly in this order):
 
     * Directories:
